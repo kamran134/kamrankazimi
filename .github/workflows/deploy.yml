@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [master]  # Или твоя основная ветка
+    branches: [master]
 
 jobs:
   build:
@@ -15,27 +15,27 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}  # Создай этот секрет в настройках репозитория
+          username: kamran134
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest  # Замени на твой repo, напр. ghcr.io/username/project-name:latest
+          tags: ghcr.io/kamran134/kamrankazimi:latest
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build  # Запускается послеビルда
+    needs: build
     steps:
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_IP }}  # 185.139.230.173
-          username: ${{ secrets.SERVER_USERNAME }}  # Твой SSH-юзер на сервере
-          key: ${{ secrets.SERVER_SSH_KEY }}  # Приватный SSH-ключ
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd kamrankazimi  # Путь на сервере, где docker-compose.yml
-            docker compose pull  # Pull свежий образ
-            docker compose up -d --force-recreate  # Restart контейнеров
+            cd /root/kamrankazimi
+            docker compose pull
+            docker compose up -d --force-recreate
