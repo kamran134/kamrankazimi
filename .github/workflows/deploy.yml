@@ -36,6 +36,6 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}  # Твой SSH-юзер на сервере
           key: ${{ secrets.SERVER_SSH_KEY }}  # Приватный SSH-ключ
           script: |
-            cd /path/to/your/project/dir  # Путь на сервере, где docker-compose.yml
+            cd kamrankazimi  # Путь на сервере, где docker-compose.yml
             docker compose pull  # Pull свежий образ
             docker compose up -d --force-recreate  # Restart контейнеров
