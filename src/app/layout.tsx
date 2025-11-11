@@ -6,6 +6,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import { ThemeProvider } from "@/lib/ThemeContext";
+import { SessionProvider } from "@/components/SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,19 +33,21 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <LanguageProvider>
-            <nav className="fixed top-0 right-0 z-50 p-4">
-              <div className="flex gap-4 bg-white/10 dark:bg-black/10 backdrop-blur-md rounded-full px-4 py-2">
-                <ThemeSwitcher />
-                <LanguageSwitcher />
-              </div>
-            </nav>
-            <main>
-              {children}
-            </main>
-          </LanguageProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <nav className="fixed top-0 right-0 z-50 p-4">
+                <div className="flex gap-4 bg-white/10 dark:bg-black/10 backdrop-blur-md rounded-full px-4 py-2">
+                  <ThemeSwitcher />
+                  <LanguageSwitcher />
+                </div>
+              </nav>
+              <main>
+                {children}
+              </main>
+            </LanguageProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

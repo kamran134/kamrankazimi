@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HeroContent {
+  id          String   @id @default(uuid())
+  titleAz     String
+  titleRu     String
+  titleEn     String
+  subtitleAz  String
+  subtitleRu  String
+  subtitleEn  String
+  descAz      String   @default("")
+  descRu      String   @default("")
+  descEn      String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AboutContent {
+  id          String   @id @default(uuid())
+  titleAz     String
+  titleRu     String
+  titleEn     String
+  para1Az     String
+  para1Ru     String
+  para1En     String
+  para2Az     String
+  para2Ru     String
+  para2En     String
+  para3Az     String
+  para3Ru     String
+  para3En     String
+  imageUrl    String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(uuid())
+  name      String
+  category  String   // Frontend, Backend, DevOps
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  titleAz     String
+  titleRu     String
+  titleEn     String
+  descAz      String
+  descRu      String
+  descEn      String
+  imageUrl    String   @default("")
+  techStack   String   // JSON array as string
+  githubUrl   String   @default("")
+  liveUrl     String   @default("")
+  order       Int      @default(0)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactInfo {
+  id        String   @id @default(uuid())
+  email     String
+  phone     String   @default("")
+  github    String   @default("")
+  linkedin  String   @default("")
+  telegram  String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

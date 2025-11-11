@@ -3,9 +3,11 @@
 import { useLanguage } from "@/lib/LanguageContext";
 import { getText } from "@/lib/i18n";
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
+import { useContent } from "@/lib/useContent";
 
 export default function Home() {
   const { lang } = useLanguage();
+  const { hero, about, projects, skills, contact } = useContent();
   useScrollAnimation();
 
   return (
@@ -16,25 +18,25 @@ export default function Home() {
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <div className="animate-on-scroll opacity-0 transition-all duration-1000">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-              {getText({
-                az: "Kamran Kazımi",
-                ru: "Камран Казыми", 
-                en: "Kamran Kazimi"
-              }, lang)}
+              {hero?.titleAz ? getText({
+                az: hero.titleAz,
+                ru: hero.titleRu,
+                en: hero.titleEn
+              }, lang) : "Kamran Kazimi"}
             </h1>
             <h2 className="text-2xl md:text-3xl mb-8 font-light">
-              {getText({
-                az: "Frontend Mühəndis - 7+ il təcrübə",
-                ru: "Фронтенд Разработчик - 7+ лет опыта",
-                en: "Frontend Developer - 7+ Years Experience"
-              }, lang)}
+              {hero?.subtitleAz ? getText({
+                az: hero.subtitleAz,
+                ru: hero.subtitleRu,
+                en: hero.subtitleEn
+              }, lang) : "Frontend Developer"}
             </h2>
             <p className="text-xl mb-12 opacity-90 max-w-2xl mx-auto">
-              {getText({
-                az: "Miqyaslana bilən, adaptiv və əlçatan veb tətbiqlər quran Frontend Developer. React, NextJS, TypeScript, Redux Toolkit və müasir frontend texnologiyaları üzrə ekspert.",
-                ru: "Frontend разработчик, создающий масштабируемые, адаптивные и доступные веб-приложения. Эксперт в React, NextJS, TypeScript, Redux Toolkit и современных frontend технологиях.",
-                en: "Frontend Developer building scalable, responsive, and accessible web applications. Expert in React, NextJS, TypeScript, Redux Toolkit and modern frontend technologies."
-              }, lang)}
+              {hero?.descAz ? getText({
+                az: hero.descAz,
+                ru: hero.descRu,
+                en: hero.descEn
+              }, lang) : "Frontend Developer building scalable, responsive, and accessible web applications."}
             </p>
             <div className="flex gap-6 justify-center">
               <a 
@@ -59,7 +61,11 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="animate-on-scroll opacity-0 transition-all duration-700">
             <h2 className="text-4xl font-bold text-center mb-16 text-gray-900 dark:text-white">
-              {getText({az: "Haqqımda", ru: "Обо мне", en: "About Me"}, lang)}
+              {about?.titleAz ? getText({
+                az: about.titleAz,
+                ru: about.titleRu,
+                en: about.titleEn
+              }, lang) : getText({az: "Haqqımda", ru: "Обо мне", en: "About Me"}, lang)}
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -69,24 +75,36 @@ export default function Home() {
               </div>
               <div className="space-y-6">
                 <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {getText({
-                    az: "7+ il əməli təcrübəyə malik Frontend Developer olaraq, miqyaslana bilən, adaptiv və əlçatan veb tətbiqlər qurmaq üzrə ixtisaslaşıram. React, TypeScript, Redux Toolkit və Tailwind CSS kimi müasir frontend texnologiyalarında bacarıqlıyam.",
-                    ru: "Frontend разработчик с 7+ годами практического опыта, специализирующийся на создании масштабируемых, адаптивных и доступных веб-приложений. Владею современными frontend технологиями, такими как React, TypeScript, Redux Toolkit и Tailwind CSS.",
-                    en: "Frontend Developer with 7+ years of hands-on experience building scalable, responsive, and accessible web applications. Skilled in modern frontend technologies such as React, TypeScript, Redux Toolkit, and Tailwind CSS."
+                  {about?.para1Az ? getText({
+                    az: about.para1Az,
+                    ru: about.para1Ru,
+                    en: about.para1En
+                  }, lang) : getText({
+                    az: "7+ il əməli təcrübəyə malik Frontend Developer olaraq, miqyaslana bilən, adaptiv və əlçatan veb tətbiqlər qurmaq üzrə ixtisaslaşıram.",
+                    ru: "Frontend разработчик с 7+ годами практического опыта, специализирующийся на создании масштабируемых веб-приложений.",
+                    en: "Frontend Developer with 7+ years of experience building scalable web applications."
                   }, lang)}
                 </p>
                 <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {getText({
-                    az: "Hal-hazırda Azərbaycan Respublikasının Dövlət İmtahan Mərkəzində işləyir, geniş miqyaslı dövlət sistemlərinə töhfə verir və junior developerlərə kod təftişi vasitəsilə mentorluq edirəm. Təmiz UI yaratmağa, performansı artırmağa və ən yaxşı təcrübələri tətbiq etməyə diqqət yetirirəm.",
-                    ru: "В настоящее время работаю в Государственном Экзаменационном Центре Азербайджана, внося вклад в крупномасштабные государственные системы и наставляю младших разработчиков через код-ревью. Сосредоточен на создании чистого UI, улучшении производительности и следовании лучшим практикам.",
-                    en: "Currently working at the State Examination Center of Azerbaijan, contributing to large-scale public systems and mentoring junior developers through code reviews. Focused on delivering clean UI, improving performance, and following best practices."
+                  {about?.para2Az ? getText({
+                    az: about.para2Az,
+                    ru: about.para2Ru,
+                    en: about.para2En
+                  }, lang) : getText({
+                    az: "Hal-hazırda Dövlət İmtahan Mərkəzində işləyirəm.",
+                    ru: "В настоящее время работаю в Государственном Экзаменационном Центре.",
+                    en: "Currently working at the State Examination Center."
                   }, lang)}
                 </p>
                 <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {getText({
-                    az: "REST API-ləri inteqrasiya etməkdə və backend komandaları ilə sıx əməkdaşlıq etməkdə səriştəli. Developer təcrübəsinin təkmilləşdirilməsi və arxitektura rəhbərliyi sahəsində inkişaf etməyə həvəsliyəm.",
-                    ru: "Профессионально интегрирую REST API и тесно сотрудничаю с backend командами. Увлечен улучшением опыта разработчиков и развитием в сторону архитектурного лидерства.",
-                    en: "Proficient in integrating REST APIs and collaborating closely with backend teams. Passionate about developer experience, and growing toward architectural leadership."
+                  {about?.para3Az ? getText({
+                    az: about.para3Az,
+                    ru: about.para3Ru,
+                    en: about.para3En
+                  }, lang) : getText({
+                    az: "REST API-ləri inteqrasiya edirəm.",
+                    ru: "Интегрирую REST API.",
+                    en: "Integrating REST APIs."
                   }, lang)}
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -109,8 +127,28 @@ export default function Home() {
             <h2 className="text-4xl font-bold text-center mb-16 text-gray-900 dark:text-white">
               {getText({az: "Bacarıqlar", ru: "Навыки", en: "Skills"}, lang)}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {/* Frontend */}
+            
+            {skills && skills.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                {['Frontend', 'Backend', 'DevOps', 'Other'].map((category) => {
+                  const categorySkills = skills.filter(s => s.category === category);
+                  if (categorySkills.length === 0) return null;
+                  
+                  return (
+                    <div key={category} className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                      <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">{category}</h3>
+                      <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
+                        {categorySkills.map((skill) => (
+                          <li key={skill.id}>{skill.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                {/* Fallback static content */}
               <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mb-4">
                   ⚛️
@@ -181,6 +219,7 @@ export default function Home() {
               </div>
                                 
             </div>
+            )}
           </div>
         </div>
       </section>
@@ -360,8 +399,61 @@ export default function Home() {
             <h2 className="text-4xl font-bold text-center mb-16 text-gray-900 dark:text-white">
               {getText({az: "Layihələr", ru: "Проекты", en: "Projects"}, lang)}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Project 1 - State Examination Center */}
+            
+            {projects && projects.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {projects.filter(p => p.featured).map((project) => (
+                  <div key={project.id} className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                    {project.imageUrl ? (
+                      <img src={project.imageUrl} alt={project.titleEn} className="h-48 w-full object-cover" />
+                    ) : (
+                      <div className="h-48 bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                        {project.titleEn.substring(0, 3).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                        {getText({
+                          az: project.titleAz,
+                          ru: project.titleRu,
+                          en: project.titleEn
+                        }, lang)}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4">
+                        {getText({
+                          az: project.descAz,
+                          ru: project.descRu,
+                          en: project.descEn
+                        }, lang)}
+                      </p>
+                      {project.techStack && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {project.techStack.split(',').map((tech, i) => (
+                            <span key={i} className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
+                              {tech.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-4">
+                        {project.githubUrl && (
+                          <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                            GitHub
+                          </a>
+                        )}
+                        {project.liveUrl && (
+                          <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                            Live Demo
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* Fallback static content */}
               <div className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="h-48 bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
                   🏛️ DİM
@@ -457,6 +549,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            )}
           </div>
         </div>
       </section>
@@ -487,33 +580,67 @@ export default function Home() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">Email</p>
-                      <a href="mailto:kazimi.dev@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline">
-                        kazimi.dev@gmail.com
+                      <a href={`mailto:${contact?.email || 'kazimi.dev@gmail.com'}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                        {contact?.email || 'kazimi.dev@gmail.com'}
                       </a>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                      <span className="text-blue-600 dark:text-blue-400 text-xl">💼</span>
+                  
+                  {contact?.phone && (
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <span className="text-blue-600 dark:text-blue-400 text-xl">�</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">Phone</p>
+                        <a href={`tel:${contact.phone}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                          {contact.phone}
+                        </a>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">LinkedIn</p>
-                      <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
-                        /in/kamran-kazimi
-                      </a>
+                  )}
+                  
+                  {contact?.linkedin && (
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <span className="text-blue-600 dark:text-blue-400 text-xl">💼</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">LinkedIn</p>
+                        <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                          {contact.linkedin.replace('https://', '')}
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                      <span className="text-blue-600 dark:text-blue-400 text-xl">🐙</span>
+                  )}
+                  
+                  {contact?.github && (
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <span className="text-blue-600 dark:text-blue-400 text-xl">🐙</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">GitHub</p>
+                        <a href={contact.github} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                          {contact.github.replace('https://', '')}
+                        </a>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">GitHub</p>
-                      <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
-                        github.com/kamran134
-                      </a>
+                  )}
+                  
+                  {contact?.telegram && (
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <span className="text-blue-600 dark:text-blue-400 text-xl">✈️</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">Telegram</p>
+                        <a href={`https://t.me/${contact.telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                          {contact.telegram}
+                        </a>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg">
