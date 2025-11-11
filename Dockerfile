@@ -15,7 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Временная заглушка для DATABASE_URL при генерации Prisma клиента
-ENV DATABASE_URL="file:./dev.db"
+ENV DATABASE_URL="postgresql://user:password@localhost:5432/db"
 
 # Генерация Prisma клиента
 RUN npx prisma generate
