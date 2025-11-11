@@ -14,6 +14,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Генерация Prisma клиента
+RUN npx prisma generate
+
 # Отключить telemetry и пропустить проверку переменных окружения при сборке
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV SKIP_ENV_VALIDATION=1
