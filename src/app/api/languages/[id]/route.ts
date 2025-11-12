@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 // PUT update language (protected)
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,9 +14,10 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const data = await request.json();
     const language = await prisma.language.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         languageAz: data.languageAz,
         languageRu: data.languageRu,
@@ -41,7 +42,7 @@ export async function PUT(
 // DELETE language (protected)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -49,8 +50,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     await prisma.language.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'Language deleted successfully' });

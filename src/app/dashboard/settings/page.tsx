@@ -15,14 +15,6 @@ interface Language {
   order: number;
 }
 
-interface SiteSettings {
-  id: string;
-  copyrightYear: number;
-  footerTextAz: string;
-  footerTextRu: string;
-  footerTextEn: string;
-}
-
 export default function SettingsPage() {
   const { status } = useSession();
   const router = useRouter();

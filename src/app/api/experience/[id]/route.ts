@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 // PUT update experience (protected)
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,9 +14,10 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const data = await request.json();
     const experience = await prisma.experience.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         companyAz: data.companyAz,
         companyRu: data.companyRu,
@@ -53,7 +54,7 @@ export async function PUT(
 // DELETE experience (protected)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -61,8 +62,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     await prisma.experience.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'Experience deleted successfully' });

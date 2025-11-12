@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 // PUT update education (protected)
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,9 +14,10 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const data = await request.json();
     const education = await prisma.education.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         degreeAz: data.degreeAz,
         degreeRu: data.degreeRu,
@@ -42,7 +43,7 @@ export async function PUT(
 // DELETE education (protected)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -50,8 +51,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     await prisma.education.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'Education deleted successfully' });
