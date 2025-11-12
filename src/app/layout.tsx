@@ -19,19 +19,29 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Kamran Kazimi - Portfolio",
-  description: "Frontend Engineer Portfolio - Kamran Kazimi",
+  description: "7+ il əməli təcrübəyə malik Frontend Developer olaraq, miqyaslana bilən, adaptiv və əlçatan veb tətbiqlər qurmaq üzrə ixtisaslaşıram.",
+  metadataBase: new URL('https://kamrankazimi.dev'),
   openGraph: {
     title: "Kamran Kazimi - Frontend Engineer",
-    description: "Frontend Engineer Portfolio - Kamran Kazimi",
+    description: "7+ il əməli təcrübəyə malik Frontend Developer olaraq, miqyaslana bilən, adaptiv və əlçatan veb tətbiqlər qurmaq üzrə ixtisaslaşıram.",
     url: "https://kamrankazimi.dev",
     siteName: "Kamran Kazimi Portfolio",
-    locale: "en_US",
+    locale: "az_AZ",
     type: "website",
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'Kamran Kazimi - Frontend Engineer',
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Kamran Kazimi - Frontend Engineer",
-    description: "Frontend Engineer Portfolio - Kamran Kazimi",
+    description: "7+ il əməli təcrübəyə malik Frontend Developer olaraq, miqyaslana bilən, adaptiv və əlçatan veb tətbiqlər qurmaq üzrə ixtisaslaşıram.",
+    images: ['/opengraph-image'],
   },
 };
 

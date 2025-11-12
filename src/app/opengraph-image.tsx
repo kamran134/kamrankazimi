@@ -14,6 +14,10 @@ export default async function Image() {
     // Fetch about content with avatar
     const about = await prisma.aboutContent.findFirst();
     
+    const imageUrl = about?.imageUrl 
+      ? `https://kamrankazimi.dev${about.imageUrl}`
+      : null;
+
     return new ImageResponse(
       (
         <div
@@ -21,53 +25,99 @@ export default async function Image() {
             height: '100%',
             width: '100%',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             fontFamily: 'system-ui',
+            padding: '60px',
           }}
         >
-          {about?.imageUrl && (
-            <img
-              src={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://kamrankazimi.dev'}${about.imageUrl}`}
-              alt="Avatar"
-              width="200"
-              height="200"
-              style={{
-                borderRadius: '50%',
-                border: '6px solid white',
-                marginBottom: '40px',
-              }}
-            />
-          )}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              color: 'white',
+              gap: '60px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '30px',
+              padding: '60px',
+              backdropFilter: 'blur(10px)',
             }}
           >
-            <h1
+            {/* Avatar */}
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="Avatar"
+                width="280"
+                height="280"
+                style={{
+                  borderRadius: '50%',
+                  border: '8px solid white',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '280px',
+                  height: '280px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #9333ea 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '100px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  border: '8px solid white',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                KK
+              </div>
+            )}
+
+            {/* Text Content */}
+            <div
               style={{
-                fontSize: '60px',
-                fontWeight: 'bold',
-                margin: '0 0 20px 0',
-                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '15px',
+                maxWidth: '650px',
+                color: 'white',
               }}
             >
-              Kamran Kazimi
-            </h1>
-            <p
-              style={{
-                fontSize: '32px',
-                margin: 0,
-                opacity: 0.9,
-              }}
-            >
-              Frontend Engineer
-            </p>
+              <h1
+                style={{
+                  fontSize: '64px',
+                  fontWeight: 'bold',
+                  margin: 0,
+                  lineHeight: 1.1,
+                }}
+              >
+                {about?.titleAz || 'Kamran Kazimi'}
+              </h1>
+              <p
+                style={{
+                  fontSize: '32px',
+                  margin: 0,
+                  opacity: 0.95,
+                  fontWeight: '600',
+                }}
+              >
+                Frontend Engineer
+              </p>
+              <p
+                style={{
+                  fontSize: '22px',
+                  margin: 0,
+                  opacity: 0.85,
+                  lineHeight: 1.5,
+                }}
+              >
+                {about?.para1Az?.substring(0, 140) || '7+ il əməli təcrübəyə malik Frontend Developer olaraq, miqyaslana bilən, adaptiv və əlçatan veb tətbiqlər qurmaq üzrə ixtisaslaşıram'}...
+              </p>
+            </div>
           </div>
         </div>
       ),
