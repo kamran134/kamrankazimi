@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 export default function DashboardLayout({
   children,
@@ -48,7 +47,6 @@ export default function DashboardLayout({
                   {session.user.email}
                 </span>
               )}
-              <ThemeSwitcher />
               <Link
                 href="/"
                 className="bg-blue-600 text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition whitespace-nowrap"

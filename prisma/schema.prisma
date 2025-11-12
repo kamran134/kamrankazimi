@@ -90,3 +90,65 @@ model ContactInfo {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Experience {
+  id              String   @id @default(uuid())
+  companyAz       String
+  companyRu       String
+  companyEn       String
+  positionAz      String
+  positionRu      String
+  positionEn      String
+  periodAz        String
+  periodRu        String
+  periodEn        String
+  locationAz      String
+  locationRu      String
+  locationEn      String
+  responsibilitiesAz String @db.Text
+  responsibilitiesRu String @db.Text
+  responsibilitiesEn String @db.Text
+  startDate       DateTime
+  endDate         DateTime?
+  current         Boolean  @default(false)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Education {
+  id            String   @id @default(uuid())
+  degreeAz      String
+  degreeRu      String
+  degreeEn      String
+  institutionAz String
+  institutionRu String
+  institutionEn String
+  year          Int
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Language {
+  id              String   @id @default(uuid())
+  languageAz      String
+  languageRu      String
+  languageEn      String
+  proficiencyAz   String
+  proficiencyRu   String
+  proficiencyEn   String
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SiteSettings {
+  id            String   @id @default(uuid())
+  copyrightYear Int
+  footerTextAz  String   @default("")
+  footerTextRu  String   @default("")
+  footerTextEn  String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

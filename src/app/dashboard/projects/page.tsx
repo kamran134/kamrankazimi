@@ -25,6 +25,22 @@ interface Skill {
   order: number;
 }
 
+const CATEGORY_ICONS: Record<string, string> = {
+  'Frontend': '⚛️',
+  'Testing & Tools': '🔧',
+  'Backend & APIs': '🔌',
+  'Mobile & Desktop': '📱',
+  'Additional skills': '🛠️',
+};
+
+const CATEGORIES = [
+  'Frontend',
+  'Testing & Tools',
+  'Backend & APIs',
+  'Mobile & Desktop',
+  'Additional skills',
+];
+
 export default function ProjectsPage() {
   const [activeTab, setActiveTab] = useState<'projects' | 'skills'>('projects');
   const [projects, setProjects] = useState<Project[]>([]);
@@ -32,7 +48,7 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [newSkill, setNewSkill] = useState<Skill>({ name: '', category: 'Frontend', order: 0 });
+  const [newSkill, setNewSkill] = useState<Skill>({ name: '', category: CATEGORIES[0], order: 0 });
 
   useEffect(() => {
     fetchData();
@@ -110,7 +126,7 @@ export default function ProjectsPage() {
 
       if (res.ok) {
         setMessage('Skill added successfully!');
-        setNewSkill({ name: '', category: 'Frontend', order: 0 });
+        setNewSkill({ name: '', category: CATEGORIES[0], order: 0 });
         fetchData();
         setTimeout(() => setMessage(''), 3000);
       }
@@ -310,9 +326,11 @@ export default function ProjectsPage() {
                 onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
                 className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
-                <option value="Frontend">Frontend</option>
-                <option value="Backend">Backend</option>
-                <option value="DevOps">DevOps</option>
+                {CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {CATEGORY_ICONS[category]} {category}
+                  </option>
+                ))}
               </select>
               <input
                 type="number"
@@ -331,9 +349,12 @@ export default function ProjectsPage() {
             </div>
           </div>
 
-          {['Frontend', 'Backend', 'DevOps'].map((category) => (
+          {CATEGORIES.map((category) => (
             <div key={category} className="mb-6">
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{category}</h2>
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+                <span className="text-2xl mr-2">{CATEGORY_ICONS[category]}</span>
+                {category}
+              </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {skills.filter(s => s.category === category).map((skill) => (
                   <div key={skill.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 flex justify-between items-center">

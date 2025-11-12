@@ -39,3 +39,8 @@ jobs:
             cd /root/kamrankazimi
             docker compose pull
             docker compose up -d --force-recreate
+            echo "⏳ Waiting for container to be ready..."
+            sleep 5
+            echo "🔄 Running database migrations..."
+            docker compose exec -T app npx prisma migrate deploy
+            echo "✅ Migrations completed successfully!"

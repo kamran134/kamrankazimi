@@ -2,8 +2,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SiteControls } from "@/components/SiteControls";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { SessionProvider } from "@/components/SessionProvider";
@@ -36,12 +35,7 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider>
             <LanguageProvider>
-              <nav className="fixed top-0 right-0 z-50 p-4">
-                <div className="flex gap-4 bg-white/10 dark:bg-black/10 backdrop-blur-md rounded-full px-4 py-2">
-                  <ThemeSwitcher />
-                  <LanguageSwitcher />
-                </div>
-              </nav>
+              <SiteControls />
               <main>
                 {children}
               </main>

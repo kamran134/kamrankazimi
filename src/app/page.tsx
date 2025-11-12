@@ -7,7 +7,7 @@ import { useContent } from "@/lib/useContent";
 
 export default function Home() {
   const { lang } = useLanguage();
-  const { hero, about, projects, skills, contact } = useContent();
+  const { hero, about, projects, skills, contact, experiences, education, languages, settings } = useContent();
   useScrollAnimation();
 
   return (
@@ -130,18 +130,30 @@ export default function Home() {
             
             {skills && skills.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                {['Frontend', 'Backend', 'DevOps', 'Other'].map((category) => {
-                  const categorySkills = skills.filter(s => s.category === category);
+                {[
+                  { name: 'Frontend', icon: '⚛️', gradient: 'from-blue-500 to-cyan-500' },
+                  { name: 'Testing & Tools', icon: '🔧', gradient: 'from-green-500 to-emerald-500' },
+                  { name: 'Backend & APIs', icon: '🔌', gradient: 'from-purple-500 to-pink-500' },
+                  { name: 'Mobile & Desktop', icon: '📱', gradient: 'from-orange-500 to-red-500' },
+                  { name: 'Additional skills', icon: '🛠️', gradient: 'from-orange-500 to-red-500' },
+                ].map((category) => {
+                  const categorySkills = skills.filter(s => s.category === category.name);
                   if (categorySkills.length === 0) return null;
                   
                   return (
-                    <div key={category} className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                      <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">{category}</h3>
-                      <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-                        {categorySkills.map((skill) => (
-                          <li key={skill.id}>{skill.name}</li>
+                    <div key={category.name} className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                      <div className={`w-14 h-14 bg-gradient-to-br ${category.gradient} rounded-lg flex items-center justify-center text-white text-xl font-bold mb-4`}>
+                        {category.icon}
+                      </div>
+                      <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">{category.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {categorySkills.map((skill, index) => (
+                          <span key={skill.id}>
+                            {skill.name}
+                            {index < categorySkills.length - 1 ? ', ' : ''}
+                          </span>
                         ))}
-                      </ul>
+                      </p>
                     </div>
                   );
                 })}
@@ -232,159 +244,111 @@ export default function Home() {
               {getText({az: "İş Təcrübəsi", ru: "Опыт работы", en: "Professional Experience"}, lang)}
             </h2>
             <div className="space-y-8">
-              {/* Current Job */}
-              <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {experiences && experiences.length > 0 ? (
+                experiences.map((exp) => (
+                  <div key={exp.id} className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {getText({
+                            az: exp.positionAz,
+                            ru: exp.positionRu,
+                            en: exp.positionEn
+                          }, lang)}
+                        </h3>
+                        <p className="text-lg text-blue-600 dark:text-blue-400 font-semibold">
+                          {getText({
+                            az: exp.companyAz,
+                            ru: exp.companyRu,
+                            en: exp.companyEn
+                          }, lang)}
+                        </p>
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400 font-medium mt-2 md:mt-0">
+                        {getText({
+                          az: exp.periodAz,
+                          ru: exp.periodRu,
+                          en: exp.periodEn
+                        }, lang)} | {getText({
+                          az: exp.locationAz,
+                          ru: exp.locationRu,
+                          en: exp.locationEn
+                        }, lang)}
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
                       {getText({
-                        az: "Frontend / Fullstack Developer",
-                        ru: "Frontend / Fullstack Разработчик", 
-                        en: "Frontend / Fullstack Developer"
-                      }, lang)}
-                    </h3>
-                    <p className="text-lg text-blue-600 dark:text-blue-400 font-semibold">
-                      {getText({
-                        az: "Azərbaycan Respublikası Dövlət İmtahan Mərkəzi",
-                        ru: "Государственный экзаменационный центр Азербайджанской Республики",
-                        en: "State Examination Center of the Republic of Azerbaijan"
-                      }, lang)}
-                    </p>
+                        az: exp.responsibilitiesAz,
+                        ru: exp.responsibilitiesRu,
+                        en: exp.responsibilitiesEn
+                      }, lang).split('\n').map((line, idx) => (
+                        <p key={idx}>{line}</p>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-gray-600 dark:text-gray-400 font-medium mt-2 md:mt-0">
-                    {getText({az: "Sen 2021 – İndiki vaxt", ru: "Сен 2021 – Настоящее время", en: "Sep 2021 – Present"}, lang)} | 
-                    {getText({az: " Bakı, Azərbaycan", ru: " Баку, Азербайджан", en: " Baku, Azerbaijan"}, lang)}
-                  </div>
-                </div>
-                <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                  <li>• {getText({
-                    az: "React, TypeScript və Redux Toolkit istifadə edərək mürəkkəb istifadəçi interfeyslərini inkişaf etdirdim",
-                    ru: "Разработал сложные пользовательские интерфейсы с использованием React, TypeScript и Redux Toolkit",
-                    en: "Developed complex user interfaces using React, TypeScript, and Redux Toolkit"
-                  }, lang)}</li>
-                  <li>• {getText({
-                    az: "ASP.NET Core API-lərini inteqrasiya etmək üçün backend developerləri ilə əməkdaşlıq etdim",
-                    ru: "Сотрудничал с backend разработчиками для интеграции ASP.NET Core APIs",
-                    en: "Collaborated with backend developers to integrate ASP.NET Core APIs"
-                  }, lang)}</li>
-                  <li>• {getText({
-                    az: "Arxitektura müzakirələrində iştirak etdim və UI modullarının planlaşdırılmasına töhfə verdim",
-                    ru: "Участвовал в архитектурных обсуждениях и планировании UI модулей",
-                    en: "Participated in architecture discussions and contributed to planning UI modules"
-                  }, lang)}</li>
-                  <li>• {getText({
-                    az: "Legacy sistemləri saxladım və onların bir hissəsini müasir texnologiyalara keçirdim",
-                    ru: "Поддерживал legacy системы и переводил части на современный tech stack",
-                    en: "Maintained legacy systems and transitioned parts to modern tech stack"
-                  }, lang)}</li>
-                </ul>
-              </div>
-
-              {/* Previous Jobs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">React Developer</h3>
-                  <p className="text-blue-600 dark:text-blue-400 font-semibold mb-2">Zirinc</p>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                    {getText({az: "Apr 2019 – Avq 2021", ru: "Апр 2019 – Авг 2021", en: "Apr 2019 – Aug 2021"}, lang)} | 
-                    {getText({az: " Bakı, Azərbaycan", ru: " Баку, Азербайджан", en: " Baku, Azerbaijan"}, lang)}
-                  </p>
-                  <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
-                    <li>• {getText({
-                      az: "React və React Native ilə biznes portalları və mobil tətbiqlər yaratdım",
-                      ru: "Создал бизнес-порталы и мобильные приложения с React и React Native",
-                      en: "Created business web portals and mobile apps with React and React Native"
-                    }, lang)}</li>
-                    <li>• {getText({
-                      az: "Təkrar istifadə olunan UI komponentləri və performans optimallaşdırması üzərində işlədim",
-                      ru: "Работал над переиспользуемыми UI компонентами и оптимизацией производительности",
-                      en: "Focused on reusable UI components and performance optimization"
-                    }, lang)}</li>
-                  </ul>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Software Developer</h3>
-                  <p className="text-blue-600 dark:text-blue-400 font-semibold mb-2">Riberry</p>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                    {getText({az: "İyun 2017 – Apr 2019", ru: "Июн 2017 – Апр 2019", en: "Jun 2017 – Apr 2019"}, lang)} | 
-                    {getText({az: " Bakı, Azərbaycan", ru: " Баку, Азербайджан", en: " Baku, Azerbaijan"}, lang)}
-                  </p>
-                  <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
-                    <li>• {getText({
-                      az: "Riberry.az platformasında dəstək və təkmilləşdirmə işləri aparırdım",
-                      ru: "Поддерживал и улучшал платформу Riberry.az",
-                      en: "Maintained and improved the Riberry.az platform"
-                    }, lang)}</li>
-                    <li>• {getText({
-                      az: "Frontend (React, Angular) və backend (Spring Boot, PostgreSQL) ilə fullstack inkişafda iştirak etdim",
-                      ru: "Участвовал в fullstack разработке с frontend (React, Angular) и backend (Spring Boot, PostgreSQL)",
-                      en: "Participated in fullstack development for frontend (React, Angular) and backend (Spring Boot, PostgreSQL)"
-                    }, lang)}</li>
-                  </ul>
-                </div>
-              </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-600 dark:text-gray-400">No experience data available</p>
+              )}
 
               {/* Education */}
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-8 rounded-xl shadow-lg">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                   {getText({az: "Təhsil", ru: "Образование", en: "Education"}, lang)}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {getText({
-                        az: "Kompüter Elmləri üzrə Magistr",
-                        ru: "Магистр компьютерных наук",
-                        en: "M.Sc. in Computer Science"
-                      }, lang)}
-                    </h4>
-                    <p className="text-blue-600 dark:text-blue-400">
-                      {getText({
-                        az: "Lomonosov Moskva Dövlət Universiteti, Bakı Filialı",
-                        ru: "МГУ им. Ломоносова, Бакинский филиал",
-                        en: "Lomonosov Moscow State University, Baku Branch"
-                      }, lang)}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400">2017</p>
+                {education && education.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {education.map((edu) => (
+                      <div key={edu.id}>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {getText({
+                            az: edu.degreeAz,
+                            ru: edu.degreeRu,
+                            en: edu.degreeEn
+                          }, lang)}
+                        </h4>
+                        <p className="text-blue-600 dark:text-blue-400">
+                          {getText({
+                            az: edu.institutionAz,
+                            ru: edu.institutionRu,
+                            en: edu.institutionEn
+                          }, lang)}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400">{edu.year}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {getText({
-                        az: "Kompüter Elmləri üzrə Bakalavr",
-                        ru: "Бакалавр компьютерных наук",
-                        en: "B.Sc. in Computer Science"
-                      }, lang)}
-                    </h4>
-                    <p className="text-blue-600 dark:text-blue-400">
-                      {getText({
-                        az: "Lomonosov Moskva Dövlət Universiteti, Bakı Filialı",
-                        ru: "МГУ им. Ломоносова, Бакинский филиал", 
-                        en: "Lomonosov Moscow State University, Baku Branch"
-                      }, lang)}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400">2013</p>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-gray-600 dark:text-gray-400">No education data available</p>
+                )}
                 
                 <div className="mt-6">
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                     {getText({az: "Dillər", ru: "Языки", en: "Languages"}, lang)}
                   </h4>
-                  <div className="flex flex-wrap gap-3">
-                    <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm">
-                      {getText({az: "Azərbaycanca: Ana dil", ru: "Азербайджанский: Родной", en: "Azerbaijani: Native"}, lang)}
-                    </span>
-                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm">
-                      {getText({az: "İngiliscə: İş səviyyəsi", ru: "Английский: Рабочий уровень", en: "English: Working Proficiency"}, lang)}
-                    </span>
-                    <span className="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full text-sm">
-                      {getText({az: "Rusca: Səlis", ru: "Русский: Свободно", en: "Russian: Fluent"}, lang)}
-                    </span>
-                    <span className="bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-3 py-1 rounded-full text-sm">
-                      {getText({az: "Ukraynaca: Əsas", ru: "Украинский: Базовый", en: "Ukrainian: Basic"}, lang)}
-                    </span>
-                  </div>
+                  {languages && languages.length > 0 ? (
+                    <div className="flex flex-wrap gap-3">
+                      {languages.map((lang_item, idx) => {
+                        const colors = ['green', 'blue', 'purple', 'orange', 'pink', 'indigo'];
+                        const color = colors[idx % colors.length];
+                        return (
+                          <span key={lang_item.id} className={`bg-${color}-100 dark:bg-${color}-900 text-${color}-800 dark:text-${color}-200 px-3 py-1 rounded-full text-sm`}>
+                            {getText({
+                              az: lang_item.languageAz,
+                              ru: lang_item.languageRu,
+                              en: lang_item.languageEn
+                            }, lang)}: {getText({
+                              az: lang_item.proficiencyAz,
+                              ru: lang_item.proficiencyRu,
+                              en: lang_item.proficiencyEn
+                            }, lang)}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-gray-600 dark:text-gray-400">No languages data available</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -692,7 +656,10 @@ export default function Home() {
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <p className="text-gray-400">
-            © 2024 Kamran Kazimi. {getText({az: "Bütün hüquqlar qorunur.", ru: "Все права защищены.", en: "All rights reserved."}, lang)}
+            © {settings?.copyrightYear || new Date().getFullYear()} Kamran Kazimi. {
+              settings ? getText({az: settings.footerTextAz, ru: settings.footerTextRu, en: settings.footerTextEn}, lang) :
+              getText({az: "Bütün hüquqlar qorunur.", ru: "Все права защищены.", en: "All rights reserved."}, lang)
+            }
           </p>
         </div>
       </footer>

@@ -55,3 +55,57 @@ export interface ContactInfo {
   linkedin: string;
   telegram: string;
 }
+
+export interface Experience {
+  id: string;
+  companyAz: string;
+  companyRu: string;
+  companyEn: string;
+  positionAz: string;
+  positionRu: string;
+  positionEn: string;
+  periodAz: string;
+  periodRu: string;
+  periodEn: string;
+  locationAz: string;
+  locationRu: string;
+  locationEn: string;
+  responsibilitiesAz: string;
+  responsibilitiesRu: string;
+  responsibilitiesEn: string;
+  startDate: string;
+  endDate: string | null;
+  current: boolean;
+  order: number;
+}
+
+export interface Education {
+  id: string;
+  degreeAz: string;
+  degreeRu: string;
+  degreeEn: string;
+  institutionAz: string;
+  institutionRu: string;
+  institutionEn: string;
+  year: number;
+  order: number;
+}
+
+export interface Language {
+  id: string;
+  languageAz: string;
+  languageRu: string;
+  languageEn: string;
+  proficiencyAz: string;
+  proficiencyRu: string;
+  proficiencyEn: string;
+  order: number;
+}
+
+export interface SiteSettings {
+  id: string;
+  copyrightYear: number;
+  footerTextAz: string;
+  footerTextRu: string;
+  footerTextEn: string;
+}

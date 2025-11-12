@@ -39,6 +39,36 @@ export default function Dashboard() {
                 Add and manage your projects and technical skills
               </p>
             </Link>
+            <Link
+              href="/dashboard/experience"
+              className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-transparent hover:border-blue-500"
+            >
+              <div className="text-4xl mb-4">💼</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Experience</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Manage your work experience and professional history
+              </p>
+            </Link>
+            <Link
+              href="/dashboard/education"
+              className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-transparent hover:border-blue-500"
+            >
+              <div className="text-4xl mb-4">🎓</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Education</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Manage your educational background
+              </p>
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-transparent hover:border-blue-500"
+            >
+              <div className="text-4xl mb-4">⚙️</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Languages & Settings</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Manage languages proficiency and site settings
+              </p>
+            </Link>
           </div>
         </div>
       </div>
