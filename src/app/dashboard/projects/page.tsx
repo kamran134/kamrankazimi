@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ImageUploadCrop from '@/components/ImageUploadCrop';
 
 interface Project {
   id?: string;
@@ -220,14 +221,17 @@ export default function ProjectsPage() {
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Image URL"
-                  value={editingProject.imageUrl}
-                  onChange={(e) => setEditingProject({ ...editingProject, imageUrl: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              
+              <div className="mb-4">
+                <ImageUploadCrop
+                  currentImage={editingProject.imageUrl}
+                  onImageUploaded={(url) => setEditingProject({ ...editingProject, imageUrl: url })}
+                  aspectRatio={16 / 9}
+                  label="Project Image (16:9 - Landscape)"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   placeholder="Tech Stack (comma-separated)"

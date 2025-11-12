@@ -23,6 +23,7 @@ export interface AboutContent {
   para3Az: string;
   para3Ru: string;
   para3En: string;
+  imageUrl: string;
 }
 
 export interface Project {

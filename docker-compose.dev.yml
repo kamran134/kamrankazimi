@@ -28,6 +28,9 @@ services:
       - NEXTAUTH_SECRET=your-secret-key-change-this-in-production
     depends_on:
       - postgres
+    volumes:
+      - uploads_data:/app/public/uploads
 
 volumes:
   postgres_data:
+  uploads_data:

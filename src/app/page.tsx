@@ -69,9 +69,19 @@ export default function Home() {
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <div className="w-80 h-80 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-6xl font-bold">
-                  KK
-                </div>
+                {about?.imageUrl ? (
+                  <div className="w-80 h-80 mx-auto rounded-full overflow-hidden shadow-2xl border-8 border-white dark:border-gray-800">
+                    <img
+                      src={about.imageUrl}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-80 h-80 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-6xl font-bold shadow-2xl">
+                    KK
+                  </div>
+                )}
               </div>
               <div className="space-y-6">
                 <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">

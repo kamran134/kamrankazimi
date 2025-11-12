@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ImageUploadCrop from '@/components/ImageUploadCrop';
 
 interface HeroContent {
   titleAz: string;
@@ -27,6 +28,7 @@ interface AboutContent {
   para3Az: string;
   para3Ru: string;
   para3En: string;
+  imageUrl: string;
 }
 
 interface ContactInfo {
@@ -53,6 +55,7 @@ export default function ContentPage() {
     para1Az: '', para1Ru: '', para1En: '',
     para2Az: '', para2Ru: '', para2En: '',
     para3Az: '', para3Ru: '', para3En: '',
+    imageUrl: '',
   });
 
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
@@ -217,6 +220,16 @@ export default function ContentPage() {
       {activeTab === 'about' && (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">About Section</h2>
+          
+          <div className="mb-6">
+            <ImageUploadCrop
+              currentImage={aboutContent.imageUrl}
+              onImageUploaded={(url) => setAboutContent({ ...aboutContent, imageUrl: url })}
+              aspectRatio={1}
+              label="Avatar Image (1:1 - Square)"
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {(['Az', 'Ru', 'En'] as const).map((lang) => (
               <div key={lang} className="space-y-4">
