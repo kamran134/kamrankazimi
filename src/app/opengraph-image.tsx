@@ -1,6 +1,8 @@
 import { ImageResponse } from 'next/og';
+import fs from 'fs';
+import path from 'path';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const alt = 'Kamran Kazimi - Frontend Engineer';
 export const size = {
   width: 1200,
@@ -9,10 +11,10 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Image() {
-  // Fetch the static image
-  const imageData = await fetch(new URL('../../public/og-image.jpg', import.meta.url)).then(
-    (res) => res.arrayBuffer()
-  );
+  // Read the image file
+  const imagePath = path.join(process.cwd(), 'public', 'og-image.jpg');
+  const imageBuffer = fs.readFileSync(imagePath);
+  const imageBase64 = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
 
   return new ImageResponse(
     (
@@ -41,8 +43,7 @@ export default async function Image() {
           }}
         >
           <img
-            // @ts-ignore
-            src={imageData}
+            src={imageBase64}
             alt="Kamran Kazimi"
             width="480"
             height="480"
