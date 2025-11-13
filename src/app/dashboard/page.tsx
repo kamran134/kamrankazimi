@@ -107,6 +107,16 @@ export default function Dashboard() {
                 Change your email and password
               </p>
             </Link>
+            <Link
+              href="/dashboard/messages"
+              className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-transparent hover:border-blue-500"
+            >
+              <div className="text-4xl mb-4">📬</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Contact Messages</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                View and respond to contact form submissions
+              </p>
+            </Link>
             <button
               onClick={handleDownloadCV}
               disabled={downloading}

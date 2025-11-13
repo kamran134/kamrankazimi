@@ -5,6 +5,7 @@ import { getText } from "@/lib/i18n";
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
 import { useContent } from "@/lib/useContent";
 import CodeRainBackground from "@/components/CodeRainBackground";
+import ContactForm from "@/components/ContactForm";
 
 export default function Home() {
   const { lang } = useLanguage();
@@ -636,44 +637,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg">
-                <form className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {getText({az: "Ad", ru: "Имя", en: "Name"}, lang)}
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={getText({az: "Adınız", ru: "Ваше имя", en: "Your name"}, lang)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={getText({az: "email@example.com", ru: "email@example.com", en: "email@example.com"}, lang)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {getText({az: "Mesaj", ru: "Сообщение", en: "Message"}, lang)}
-                    </label>
-                    <textarea
-                      rows={5}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={getText({az: "Mesajınız...", ru: "Ваше сообщение...", en: "Your message..."}, lang)}
-                    ></textarea>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
-                  >
-                    {getText({az: "Mesaj Göndər", ru: "Отправить сообщение", en: "Send Message"}, lang)}
-                  </button>
-                </form>
+                <ContactForm />
               </div>
             </div>
           </div>
