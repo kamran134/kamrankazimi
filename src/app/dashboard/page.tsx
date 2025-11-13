@@ -2,9 +2,37 @@
 
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { useState } from 'react';
 
 export default function Dashboard() {
   const { data: session } = useSession();
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadCV = async () => {
+    try {
+      setDownloading(true);
+      const response = await fetch('/api/cv/download');
+      
+      if (!response.ok) {
+        throw new Error('Failed to download CV');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `CV_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading CV:', error);
+      alert('Failed to download CV. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -18,7 +46,7 @@ export default function Dashboard() {
               Welcome, {session.user.email}! Manage your portfolio content, projects, and site settings.
             </p>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mt-8">
             <Link
               href="/dashboard/content"
               className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-transparent hover:border-blue-500"
@@ -69,6 +97,27 @@ export default function Dashboard() {
                 Manage languages proficiency and site settings
               </p>
             </Link>
+            <Link
+              href="/dashboard/account"
+              className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-transparent hover:border-blue-500"
+            >
+              <div className="text-4xl mb-4">🔐</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Account Settings</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Change your email and password
+              </p>
+            </Link>
+            <button
+              onClick={handleDownloadCV}
+              disabled={downloading}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 p-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-white disabled:opacity-50 disabled:cursor-not-allowed text-left"
+            >
+              <div className="text-4xl mb-4">📄</div>
+              <h3 className="text-xl font-semibold mb-2 text-white">Download CV</h3>
+              <p className="text-sm text-white/90">
+                {downloading ? 'Generating PDF...' : 'Export your portfolio as a professional PDF resume'}
+              </p>
+            </button>
           </div>
         </div>
       </div>

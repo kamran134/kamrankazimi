@@ -39,6 +39,12 @@ export default function DashboardLayout({
                 >
                   Projects
                 </Link>
+                <Link
+                  href="/dashboard/account"
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md transition"
+                >
+                  Account
+                </Link>
               </div>
             </div>
             <div className="flex items-center gap-3">
