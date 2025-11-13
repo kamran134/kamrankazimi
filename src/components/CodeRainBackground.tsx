@@ -34,15 +34,15 @@ export default function CodeRainBackground() {
     // Drawing function
     const draw = () => {
       // Semi-transparent for fade effect
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Gradient colors for different drops
+      // Modern cyan/blue palette
       const colors = [
-        'rgba(102, 126, 234, 0.7)',  // Purple-blue
-        'rgba(139, 92, 246, 0.7)',   // Purple
-        'rgba(59, 130, 246, 0.7)',   // Blue
-        'rgba(168, 85, 247, 0.7)',   // Light purple
+        'rgba(34, 211, 238, 0.6)',   // Cyan
+        'rgba(59, 130, 246, 0.6)',   // Blue
+        'rgba(99, 102, 241, 0.6)',   // Indigo
+        'rgba(147, 197, 253, 0.5)',  // Light blue
       ];
 
       ctx.font = `${fontSize}px monospace`;
@@ -77,8 +77,8 @@ export default function CodeRainBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 opacity-40"
-      style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' }}
+      className="absolute inset-0 opacity-50"
+      style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)' }}
     />
   );
 }
