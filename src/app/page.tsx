@@ -4,55 +4,73 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { getText } from "@/lib/i18n";
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
 import { useContent } from "@/lib/useContent";
+import CodeRainBackground from "@/components/CodeRainBackground";
 
 export default function Home() {
   const { lang } = useLanguage();
-  const { hero, about, projects, skills, contact, experiences, education, languages, settings } = useContent();
+  const { hero, about, projects, skills, contact, experiences, education, languages, settings, loading } = useContent();
   useScrollAnimation();
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden gradient-bg">
-        <div className="absolute inset-0 bg-black/30"></div>
+      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        {/* Animated code rain background */}
+        <CodeRainBackground />
+        
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent"></div>
+        
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <div className="animate-on-scroll opacity-0 transition-all duration-1000">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-              {hero?.titleAz ? getText({
-                az: hero.titleAz,
-                ru: hero.titleRu,
-                en: hero.titleEn
-              }, lang) : "Kamran Kazimi"}
-            </h1>
-            <h2 className="text-2xl md:text-3xl mb-8 font-light">
-              {hero?.subtitleAz ? getText({
-                az: hero.subtitleAz,
-                ru: hero.subtitleRu,
-                en: hero.subtitleEn
-              }, lang) : "Frontend Developer"}
-            </h2>
-            <p className="text-xl mb-12 opacity-90 max-w-2xl mx-auto">
-              {hero?.descAz ? getText({
-                az: hero.descAz,
-                ru: hero.descRu,
-                en: hero.descEn
-              }, lang) : "Frontend Developer building scalable, responsive, and accessible web applications."}
-            </p>
-            <div className="flex gap-6 justify-center">
-              <a 
-                href="#projects" 
-                className="bg-white text-gray-900 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105"
-              >
-                {getText({az: "Layihələr", ru: "Проекты", en: "Projects"}, lang)}
-              </a>
-              <a 
-                href="#contact" 
-                className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300"
-              >
-                {getText({az: "Əlaqə", ru: "Контакты", en: "Contact"}, lang)}
-              </a>
+          {loading ? (
+            <div className="space-y-6">
+              {/* Skeleton loader */}
+              <div className="h-20 bg-white/10 rounded-2xl animate-pulse backdrop-blur-sm"></div>
+              <div className="h-12 bg-white/10 rounded-2xl animate-pulse backdrop-blur-sm mx-auto w-3/4 animation-delay-200"></div>
+              <div className="h-16 bg-white/10 rounded-2xl animate-pulse backdrop-blur-sm mx-auto w-2/3 animation-delay-400"></div>
+              <div className="flex gap-6 justify-center animation-delay-600">
+                <div className="h-12 w-40 bg-white/10 rounded-full animate-pulse backdrop-blur-sm"></div>
+                <div className="h-12 w-40 bg-white/10 rounded-full animate-pulse backdrop-blur-sm"></div>
+              </div>
             </div>
-          </div>
+          ) : hero ? (
+            <div className="space-y-6">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight animate-fade-in-up">
+                {getText({
+                  az: hero.titleAz,
+                  ru: hero.titleRu,
+                  en: hero.titleEn
+                }, lang)}
+              </h1>
+              <h2 className="text-2xl md:text-3xl mb-8 font-light animate-fade-in-up animation-delay-200">
+                {getText({
+                  az: hero.subtitleAz,
+                  ru: hero.subtitleRu,
+                  en: hero.subtitleEn
+                }, lang)}
+              </h2>
+              <p className="text-xl mb-12 opacity-90 max-w-2xl mx-auto animate-fade-in-up animation-delay-400">
+                {getText({
+                  az: hero.descAz,
+                  ru: hero.descRu,
+                  en: hero.descEn
+                }, lang)}
+              </p>
+              <div className="flex gap-6 justify-center animate-fade-in-up animation-delay-600">
+                <a 
+                  href="#projects" 
+                  className="bg-white text-gray-900 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl"
+                >
+                  {getText({az: "Layihələr", ru: "Проекты", en: "Projects"}, lang)}
+                </a>
+                <a 
+                  href="#contact" 
+                  className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 hover:shadow-2xl"
+                >
+                  {getText({az: "Əlaqə", ru: "Контакты", en: "Contact"}, lang)}
+                </a>
+              </div>
+            </div>
+          ) : null}
         </div>
       </section>
 

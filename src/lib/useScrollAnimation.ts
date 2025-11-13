@@ -10,8 +10,8 @@ export function useScrollAnimation(triggerClass = 'animate-on-scroll') {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('animated');
-          } else {
-            entry.target.classList.remove('animated');
+            // Отключаем наблюдение после первой анимации
+            observer.unobserve(entry.target);
           }
         });
       },
