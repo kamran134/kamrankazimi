@@ -25,7 +25,7 @@ export default async function Image() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #60657c 0%, #1e1724 100%)',
           fontFamily: 'system-ui',
           padding: '80px',
         }}
@@ -59,9 +59,9 @@ export default async function Image() {
             display: 'flex',
             flexDirection: 'column',
             gap: '20px',
-            maxWidth: '580px',
+            maxWidth: '480px',
             color: 'white',
-            marginLeft: '20px',
+            marginLeft: '40px',
           }}
         >
           <h1
