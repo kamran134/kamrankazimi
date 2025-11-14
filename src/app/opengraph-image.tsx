@@ -61,6 +61,7 @@ export default async function Image() {
             gap: '20px',
             maxWidth: '580px',
             color: 'white',
+            marginLeft: '20px',
           }}
         >
           <h1
