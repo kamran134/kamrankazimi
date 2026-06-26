@@ -7,6 +7,8 @@ type ShapeType = 'circle' | 'triangle' | 'diamond' | 'square';
 interface Particle {
   x: number;
   y: number;
+  homeX: number;
+  homeY: number;
   size: number;
   shape: ShapeType;
   color: string;
@@ -23,6 +25,13 @@ const PALETTE = [
 ];
 
 const SHAPES: ShapeType[] = ['circle', 'circle', 'triangle', 'diamond', 'square'];
+
+const REPEL_RADIUS = 130;
+const REPEL_STRENGTH = 1.1;
+const HOME_PULL = 0.0004;
+const HOME_DEADZONE = 60;
+const DAMPING = 0.93;
+const MAX_SPEED = 5;
 
 function drawShape(ctx: CanvasRenderingContext2D, shape: ShapeType, s: number) {
   switch (shape) {
@@ -66,6 +75,8 @@ export default function ParticleConstellationBackground() {
     let w = 0;
     let h = 0;
     let particles: Particle[] = [];
+    let mouseX = -9999;
+    let mouseY = -9999;
 
     const resize = () => {
       w = canvas.width = canvas.offsetWidth || window.innerWidth;
@@ -74,26 +85,40 @@ export default function ParticleConstellationBackground() {
     resize();
     window.addEventListener('resize', resize);
 
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    };
+    const onMouseLeave = () => {
+      mouseX = -9999;
+      mouseY = -9999;
+    };
+    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mouseleave', onMouseLeave);
+
     const initParticles = () => {
       particles = [];
       const N = 800;
       for (let i = 0; i < N; i++) {
-        let x: number;
-        let y: number;
+        let homeX: number;
+        let homeY: number;
 
         if (Math.random() < 0.75) {
           const angle = Math.random() * Math.PI * 2;
           const r = Math.pow(Math.random(), 0.55) * Math.min(w, h) * 0.42;
-          x = w * 0.65 + Math.cos(angle) * r;
-          y = h * 0.5 + Math.sin(angle) * r;
+          homeX = w * 0.65 + Math.cos(angle) * r;
+          homeY = h * 0.5 + Math.sin(angle) * r;
         } else {
-          x = Math.random() * w;
-          y = Math.random() * h;
+          homeX = Math.random() * w;
+          homeY = Math.random() * h;
         }
 
         particles.push({
-          x,
-          y,
+          x: homeX + (Math.random() - 0.5) * 20,
+          y: homeY + (Math.random() - 0.5) * 20,
+          homeX,
+          homeY,
           size: Math.random() * 3.5 + 1.5,
           shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
           color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
@@ -111,13 +136,38 @@ export default function ParticleConstellationBackground() {
       ctx.clearRect(0, 0, w, h);
 
       for (const p of particles) {
+        // Mouse repulsion
+        const mDx = p.x - mouseX;
+        const mDy = p.y - mouseY;
+        const mDist = Math.sqrt(mDx * mDx + mDy * mDy);
+        if (mDist < REPEL_RADIUS && mDist > 0) {
+          const force = (1 - mDist / REPEL_RADIUS) * REPEL_STRENGTH;
+          p.vx += (mDx / mDist) * force;
+          p.vy += (mDy / mDist) * force;
+        }
+
+        // Gentle pull toward home position
+        const hDx = p.homeX - p.x;
+        const hDy = p.homeY - p.y;
+        const hDist = Math.sqrt(hDx * hDx + hDy * hDy);
+        if (hDist > HOME_DEADZONE) {
+          p.vx += hDx * HOME_PULL * (hDist / 100);
+          p.vy += hDy * HOME_PULL * (hDist / 100);
+        }
+
+        // Damping
+        p.vx *= DAMPING;
+        p.vy *= DAMPING;
+
+        // Speed cap
+        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (speed > MAX_SPEED) {
+          p.vx = (p.vx / speed) * MAX_SPEED;
+          p.vy = (p.vy / speed) * MAX_SPEED;
+        }
+
         p.x += p.vx;
         p.y += p.vy;
-
-        if (p.x < -10) p.x = w + 10;
-        else if (p.x > w + 10) p.x = -10;
-        if (p.y < -10) p.y = h + 10;
-        else if (p.y > h + 10) p.y = -10;
 
         ctx.save();
         ctx.globalAlpha = p.alpha;
@@ -135,6 +185,8 @@ export default function ParticleConstellationBackground() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
+      canvas.removeEventListener('mousemove', onMouseMove);
+      canvas.removeEventListener('mouseleave', onMouseLeave);
     };
   }, []);
 
