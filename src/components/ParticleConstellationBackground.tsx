@@ -27,10 +27,10 @@ const PALETTE = [
 const SHAPES: ShapeType[] = ['circle', 'circle', 'triangle', 'diamond', 'square'];
 
 const REPEL_RADIUS = 130;
-const REPEL_STRENGTH = 1.1;
-const HOME_PULL = 0.0004;
-const HOME_DEADZONE = 60;
-const DAMPING = 0.93;
+const REPEL_STRENGTH = 1.2;
+const HOME_SPRING = 0.0003;
+const DRIFT = 0.025;
+const DAMPING = 0.97;
 const MAX_SPEED = 5;
 
 function drawShape(ctx: CanvasRenderingContext2D, shape: ShapeType, s: number) {
@@ -87,15 +87,17 @@ export default function ParticleConstellationBackground() {
 
     const onMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top;
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+        mouseX = x;
+        mouseY = y;
+      } else {
+        mouseX = -9999;
+        mouseY = -9999;
+      }
     };
-    const onMouseLeave = () => {
-      mouseX = -9999;
-      mouseY = -9999;
-    };
-    canvas.addEventListener('mousemove', onMouseMove);
-    canvas.addEventListener('mouseleave', onMouseLeave);
+    window.addEventListener('mousemove', onMouseMove);
 
     const initParticles = () => {
       particles = [];
@@ -136,6 +138,14 @@ export default function ParticleConstellationBackground() {
       ctx.clearRect(0, 0, w, h);
 
       for (const p of particles) {
+        // Brownian motion — keeps particles drifting at all times
+        p.vx += (Math.random() - 0.5) * DRIFT;
+        p.vy += (Math.random() - 0.5) * DRIFT;
+
+        // Spring pull toward home — particles always orbit home loosely
+        p.vx += (p.homeX - p.x) * HOME_SPRING;
+        p.vy += (p.homeY - p.y) * HOME_SPRING;
+
         // Mouse repulsion
         const mDx = p.x - mouseX;
         const mDy = p.y - mouseY;
@@ -144,15 +154,6 @@ export default function ParticleConstellationBackground() {
           const force = (1 - mDist / REPEL_RADIUS) * REPEL_STRENGTH;
           p.vx += (mDx / mDist) * force;
           p.vy += (mDy / mDist) * force;
-        }
-
-        // Gentle pull toward home position
-        const hDx = p.homeX - p.x;
-        const hDy = p.homeY - p.y;
-        const hDist = Math.sqrt(hDx * hDx + hDy * hDy);
-        if (hDist > HOME_DEADZONE) {
-          p.vx += hDx * HOME_PULL * (hDist / 100);
-          p.vy += hDy * HOME_PULL * (hDist / 100);
         }
 
         // Damping
@@ -185,8 +186,7 @@ export default function ParticleConstellationBackground() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
-      canvas.removeEventListener('mousemove', onMouseMove);
-      canvas.removeEventListener('mouseleave', onMouseLeave);
+      window.removeEventListener('mousemove', onMouseMove);
     };
   }, []);
 
