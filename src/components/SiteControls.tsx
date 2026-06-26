@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getText } from '@/lib/i18n';
@@ -46,7 +47,7 @@ export function SiteControls() {
         }}
       >
         {/* Logo */}
-        <a
+        <Link
           href="/"
           style={{
             fontWeight: 600,
@@ -57,7 +58,7 @@ export function SiteControls() {
           }}
         >
           KK
-        </a>
+        </Link>
 
         {/* Nav links — hidden on mobile */}
         <div
