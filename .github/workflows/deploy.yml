@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,8 +25,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: kamran134
-          password: ${{ secrets.GHCR_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -50,6 +53,16 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            mkdir -p /root/kamrankazimi
+            {
+              echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}"
+              echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}"
+              echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}"
+              echo "DATABASE_URL=${{ secrets.DATABASE_URL }}"
+              echo "NEXTAUTH_URL=https://kamrankazimi.dev"
+              echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}"
+            } > /root/kamrankazimi/.env
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd /root/kamrankazimi
             docker compose pull
             docker compose up -d --force-recreate
