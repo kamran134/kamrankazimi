@@ -39,11 +39,15 @@
   --radius-cards: 24px;
 }
 
+html, body {
+  overflow: hidden;
+  height: 100%;
+}
+
 body {
   background-color: #000;
   color: #fff;
   font-family: var(--font-acronym);
-  scroll-behavior: smooth;
 }
 
 ::-webkit-scrollbar { width: 6px; }

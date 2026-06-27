@@ -1,866 +1,515 @@
 'use client';
 
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getText } from '@/lib/i18n';
-import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { useContent } from '@/lib/useContent';
-import ParticleConstellationBackground from '@/components/ParticleConstellationBackground';
+import type { HeroContent, AboutContent, Project, Skill, ContactInfo, Experience, Education, Language as LangItem, SiteSettings } from '@/types/content';
+import type { Language } from '@/lib/i18n';
+import ParticleCanvas from '@/components/ParticleCanvas';
 import ContactForm from '@/components/ContactForm';
 
-const CONTAINER = 'max-w-[1200px] mx-auto px-6';
-const SECTION = 'py-24';
+// ─── config ───────────────────────────────────────────────────────────────────
+
+const SLIDE_COUNT = 6;
+const TRANSITION_LOCK_MS = 1100;
+
+const SLIDE_HASHES: Record<string, number> = {
+  '#hero': 0, '#about': 1, '#skills': 2,
+  '#experience': 3, '#projects': 4, '#contact': 5,
+};
+
+// ─── style tokens ─────────────────────────────────────────────────────────────
+
+const eyebrow: React.CSSProperties = {
+  display: 'block',
+  fontSize: '11px',
+  fontWeight: 600,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: '#8052ff',
+  marginBottom: '14px',
+};
+
+const heading: React.CSSProperties = {
+  fontWeight: 200,
+  fontSize: 'clamp(38px, 4.5vw, 60px)',
+  lineHeight: 1.0,
+  letterSpacing: '-0.04em',
+  color: '#ffffff',
+  marginBottom: '20px',
+};
+
+const bodyText: React.CSSProperties = {
+  fontSize: '15px',
+  fontWeight: 400,
+  lineHeight: 1.68,
+  letterSpacing: '0.022em',
+  color: '#bdbdbd',
+};
 
 const card: React.CSSProperties = {
   border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '20px',
+  padding: '20px 22px',
+};
+
+const pill: React.CSSProperties = {
+  border: '1px solid rgba(128,82,255,0.35)',
+  color: '#bdbdbd',
+  padding: '4px 14px',
   borderRadius: '24px',
-  padding: '24px',
-};
-
-const eyebrow: React.CSSProperties = {
   fontSize: '12px',
-  fontWeight: 600,
-  letterSpacing: '0.05em',
-  textTransform: 'uppercase',
-  color: '#8052ff',
-  display: 'block',
-  marginBottom: '12px',
+  fontWeight: 400,
+  letterSpacing: '0.021em',
 };
 
-const sectionTitle: React.CSSProperties = {
-  fontWeight: 200,
-  fontSize: 'clamp(36px, 4vw, 48px)',
-  lineHeight: 1.05,
-  letterSpacing: '-0.04em',
-  color: '#ffffff',
-  marginBottom: '60px',
-};
+// ─── shared content bundle ────────────────────────────────────────────────────
 
-const sectionDivider: React.CSSProperties = {
-  borderTop: '1px solid rgba(255,255,255,0.06)',
-};
+interface ContentBundle {
+  hero: HeroContent | null;
+  about: AboutContent | null;
+  projects: Project[];
+  skills: Skill[];
+  contact: ContactInfo | null;
+  experiences: Experience[];
+  education: Education[];
+  languages: LangItem[];
+  settings: SiteSettings | null;
+  loading: boolean;
+  lang: Language;
+}
 
-export default function Home() {
-  const { lang } = useLanguage();
-  const { hero, about, projects, skills, contact, experiences, education, languages, settings, loading } = useContent();
-  useScrollAnimation();
+// ─── slide content components ─────────────────────────────────────────────────
 
+function HeroSlide({ d }: { d: ContentBundle }) {
+  if (d.loading || !d.hero) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 480 }}>
+        {[200, 320, 240, 44].map((w, i) => (
+          <div key={i} style={{ height: i === 1 ? 72 : i === 2 ? 52 : 14, width: w, maxWidth: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: 6, animation: 'pulse 1.5s ease-in-out infinite' }} />
+        ))}
+      </div>
+    );
+  }
+  const { hero, lang } = d;
   return (
-    <div style={{ background: '#000', minHeight: '100vh' }}>
-
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden" style={{ minHeight: '100vh' }}>
-        <ParticleConstellationBackground />
-
-        {/* gradient: text readable on left, particles show on right */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 42%, rgba(0,0,0,0.2) 72%, transparent 100%)',
-          }}
-        />
-
-        <div
-          className="relative flex items-center w-full"
-          style={{ minHeight: '100vh', paddingTop: '64px' }}
+    <div style={{ maxWidth: 500 }}>
+      <span style={eyebrow}>{getText({ az: hero.subtitleAz, ru: hero.subtitleRu, en: hero.subtitleEn }, lang)}</span>
+      <h1 style={{ fontWeight: 200, fontSize: 'clamp(52px, 6.5vw, 78px)', lineHeight: 0.9, letterSpacing: '-0.04em', color: '#fff', marginBottom: 24 }}>
+        {getText({ az: hero.titleAz, ru: hero.titleRu, en: hero.titleEn }, lang)}
+      </h1>
+      <p style={{ ...bodyText, maxWidth: '54ch', marginBottom: 36 }}>
+        {getText({ az: hero.descAz, ru: hero.descRu, en: hero.descEn }, lang)}
+      </p>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('slide:go', { detail: 4 }))}
+          style={{ background: '#8052ff', color: '#fff', padding: '13px 24px', borderRadius: 24, fontSize: 12, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }}
         >
-          <div className={`${CONTAINER} w-full`}>
-            {loading ? (
-              <div className="max-w-[520px]" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {[160, 280, 200, 44].map((w, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      height: i === 1 ? '80px' : i === 2 ? '60px' : '14px',
-                      width: i === 3 ? '240px' : `${w}px`,
-                      maxWidth: '100%',
-                      background: 'rgba(255,255,255,0.06)',
-                      borderRadius: '6px',
-                      animation: 'pulse 1.5s ease-in-out infinite',
-                    }}
-                  />
-                ))}
-              </div>
-            ) : hero ? (
-              <div className="max-w-[520px]">
-                <span className="animate-fade-in-up" style={eyebrow}>
-                  {getText({ az: hero.subtitleAz, ru: hero.subtitleRu, en: hero.subtitleEn }, lang)}
-                </span>
-
-                <h1
-                  className="animate-fade-in-up animation-delay-200"
-                  style={{
-                    fontWeight: 200,
-                    fontSize: 'clamp(52px, 6.5vw, 78px)',
-                    lineHeight: 0.9,
-                    letterSpacing: '-0.04em',
-                    color: '#ffffff',
-                    marginBottom: '24px',
-                  }}
-                >
-                  {getText({ az: hero.titleAz, ru: hero.titleRu, en: hero.titleEn }, lang)}
-                </h1>
-
-                <p
-                  className="animate-fade-in-up animation-delay-400"
-                  style={{
-                    fontSize: '15px',
-                    fontWeight: 400,
-                    lineHeight: 1.65,
-                    letterSpacing: '0.025em',
-                    color: '#bdbdbd',
-                    maxWidth: '58ch',
-                    marginBottom: '36px',
-                  }}
-                >
-                  {getText({ az: hero.descAz, ru: hero.descRu, en: hero.descEn }, lang)}
-                </p>
-
-                <div
-                  className="animate-fade-in-up animation-delay-600"
-                  style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}
-                >
-                  <a
-                    href="#projects"
-                    style={{
-                      background: '#8052ff',
-                      color: '#ffffff',
-                      padding: '14px 24px',
-                      borderRadius: '24px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      letterSpacing: '0.05em',
-                      textTransform: 'uppercase',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    {getText({ az: 'Layihələr', ru: 'Проекты', en: 'Projects' }, lang)}
-                  </a>
-                  <a
-                    href="#contact"
-                    style={{
-                      border: '1px solid rgba(255,255,255,0.22)',
-                      color: '#ffffff',
-                      padding: '14px 24px',
-                      borderRadius: '24px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      letterSpacing: '0.05em',
-                      textTransform: 'uppercase',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    {getText({ az: 'Əlaqə', ru: 'Контакты', en: 'Contact' }, lang)}
-                  </a>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      {/* ── About ── */}
-      <section id="about" className={SECTION} style={sectionDivider}>
-        <div className={CONTAINER}>
-          <div className="animate-on-scroll">
-            <span style={eyebrow}>
-              {getText({ az: 'Haqqımda', ru: 'Обо мне', en: 'About' }, lang)}
-            </span>
-            <h2 style={sectionTitle}>
-              {about?.titleAz
-                ? getText({ az: about.titleAz, ru: about.titleRu, en: about.titleEn }, lang)
-                : getText({ az: 'Haqqımda', ru: 'Обо мне', en: 'About Me' }, lang)}
-            </h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              {/* Photo */}
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                {about?.imageUrl ? (
-                  <div
-                    style={{
-                      width: '260px',
-                      height: '260px',
-                      borderRadius: '50%',
-                      overflow: 'hidden',
-                      border: '1px solid rgba(128,82,255,0.35)',
-                    }}
-                  >
-                    <img
-                      src={about.imageUrl}
-                      alt="Profile"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      width: '260px',
-                      height: '260px',
-                      borderRadius: '50%',
-                      border: '1px solid rgba(128,82,255,0.35)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '56px',
-                      fontWeight: 200,
-                      letterSpacing: '-0.04em',
-                      color: '#8052ff',
-                    }}
-                  >
-                    KK
-                  </div>
-                )}
-              </div>
-
-              {/* Text */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {[
-                  about?.para1Az
-                    ? getText({ az: about.para1Az, ru: about.para1Ru, en: about.para1En }, lang)
-                    : getText({
-                        az: '7+ il əməli təcrübəyə malik Frontend Developer.',
-                        ru: 'Frontend разработчик с 7+ годами опыта.',
-                        en: 'Frontend Developer with 7+ years of hands-on experience.',
-                      }, lang),
-                  about?.para2Az
-                    ? getText({ az: about.para2Az, ru: about.para2Ru, en: about.para2En }, lang)
-                    : null,
-                  about?.para3Az
-                    ? getText({ az: about.para3Az, ru: about.para3Ru, en: about.para3En }, lang)
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .map((para, i) => (
-                    <p
-                      key={i}
-                      style={{
-                        fontSize: '15px',
-                        fontWeight: 400,
-                        lineHeight: 1.7,
-                        letterSpacing: '0.025em',
-                        color: '#bdbdbd',
-                      }}
-                    >
-                      {para}
-                    </p>
-                  ))}
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
-                  {['React.js', 'TypeScript', 'Redux Toolkit', 'Next.js', 'Tailwind CSS', 'React Native'].map(s => (
-                    <span
-                      key={s}
-                      style={{
-                        border: '1px solid rgba(128,82,255,0.35)',
-                        color: '#bdbdbd',
-                        padding: '5px 14px',
-                        borderRadius: '24px',
-                        fontSize: '12px',
-                        fontWeight: 400,
-                        letterSpacing: '0.021em',
-                      }}
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Skills ── */}
-      <section id="skills" className={SECTION} style={sectionDivider}>
-        <div className={CONTAINER}>
-          <div className="animate-on-scroll">
-            <span style={eyebrow}>
-              {getText({ az: 'Bacarıqlar', ru: 'Навыки', en: 'Skills' }, lang)}
-            </span>
-            <h2 style={sectionTitle}>
-              {getText({ az: 'Texniki Bacarıqlar', ru: 'Технические навыки', en: 'Technical Skills' }, lang)}
-            </h2>
-
-            {skills && skills.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {[
-                  'Frontend',
-                  'Testing & Tools',
-                  'Backend & APIs',
-                  'Mobile & Desktop',
-                  'Additional skills',
-                ].map(categoryName => {
-                  const catSkills = skills.filter(s => s.category === categoryName);
-                  if (!catSkills.length) return null;
-                  return (
-                    <div key={categoryName} style={card}>
-                      <p
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          letterSpacing: '0.05em',
-                          textTransform: 'uppercase',
-                          color: '#8052ff',
-                          marginBottom: '10px',
-                        }}
-                      >
-                        {categoryName}
-                      </p>
-                      <p
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: 400,
-                          lineHeight: 1.7,
-                          letterSpacing: '0.021em',
-                          color: '#bdbdbd',
-                        }}
-                      >
-                        {catSkills.map(s => s.name).join(', ')}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {[
-                  {
-                    name: 'Frontend',
-                    text: 'React.js, Next.js, Vite, TypeScript, JavaScript ES6+, Redux Toolkit, Angular 2+, Tailwind CSS, Material UI, HTML5, SCSS, CSS3',
-                  },
-                  {
-                    name: 'Testing & Tools',
-                    text: 'Jest, React Testing Library, Git, GitLab CI/CD, Docker (basic), Webpack, Vite, Figma',
-                  },
-                  {
-                    name: 'Backend & APIs',
-                    text: 'REST APIs, GraphQL (basic), ASP .Net Core (basic), Spring Boot, PostgreSQL',
-                  },
-                  { name: 'Mobile & Desktop', text: 'React Native, Windows Forms (C#)' },
-                  { name: 'Additional', text: 'Agile (Scrum/Kanban), Code Review, CI/CD' },
-                ].map(cat => (
-                  <div key={cat.name} style={card}>
-                    <p
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                        color: '#8052ff',
-                        marginBottom: '10px',
-                      }}
-                    >
-                      {cat.name}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: 400,
-                        lineHeight: 1.7,
-                        letterSpacing: '0.021em',
-                        color: '#bdbdbd',
-                      }}
-                    >
-                      {cat.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Experience ── */}
-      <section id="experience" className={SECTION} style={sectionDivider}>
-        <div className={CONTAINER}>
-          <div className="animate-on-scroll">
-            <span style={eyebrow}>
-              {getText({ az: 'İş Təcrübəsi', ru: 'Опыт работы', en: 'Experience' }, lang)}
-            </span>
-            <h2 style={sectionTitle}>
-              {getText({ az: 'Peşəkar Yol', ru: 'Профессиональный путь', en: 'Professional Journey' }, lang)}
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {experiences && experiences.length > 0 ? (
-                experiences.map(exp => (
-                  <div key={exp.id} style={card}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        flexWrap: 'wrap',
-                        gap: '8px',
-                        marginBottom: '14px',
-                      }}
-                    >
-                      <div>
-                        <h3
-                          style={{
-                            fontSize: '17px',
-                            fontWeight: 600,
-                            color: '#ffffff',
-                            letterSpacing: '0.021em',
-                            marginBottom: '4px',
-                          }}
-                        >
-                          {getText({ az: exp.positionAz, ru: exp.positionRu, en: exp.positionEn }, lang)}
-                        </h3>
-                        <p style={{ fontSize: '14px', color: '#8052ff', letterSpacing: '0.021em' }}>
-                          {getText({ az: exp.companyAz, ru: exp.companyRu, en: exp.companyEn }, lang)}
-                        </p>
-                      </div>
-                      <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '12px', color: '#9a9a9a', letterSpacing: '0.021em' }}>
-                          {getText({ az: exp.periodAz, ru: exp.periodRu, en: exp.periodEn }, lang)}
-                        </span>
-                        <span style={{ fontSize: '12px', color: '#9a9a9a', letterSpacing: '0.021em' }}>
-                          {getText({ az: exp.locationAz, ru: exp.locationRu, en: exp.locationEn }, lang)}
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {getText({ az: exp.responsibilitiesAz, ru: exp.responsibilitiesRu, en: exp.responsibilitiesEn }, lang)
-                        .split('\n')
-                        .filter(Boolean)
-                        .map((line, idx) => (
-                          <p
-                            key={idx}
-                            style={{
-                              fontSize: '14px',
-                              fontWeight: 400,
-                              lineHeight: 1.7,
-                              letterSpacing: '0.021em',
-                              color: '#bdbdbd',
-                            }}
-                          >
-                            {line}
-                          </p>
-                        ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p style={{ color: '#9a9a9a', fontSize: '15px' }}>
-                  {getText({ az: 'Məlumat yoxdur', ru: 'Нет данных', en: 'No data available' }, lang)}
-                </p>
-              )}
-            </div>
-
-            {/* Education */}
-            <div style={{ marginTop: '60px' }}>
-              <span style={{ ...eyebrow, color: '#15846e' }}>
-                {getText({ az: 'Təhsil', ru: 'Образование', en: 'Education' }, lang)}
-              </span>
-
-              {education && education.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {education.map(edu => (
-                    <div
-                      key={edu.id}
-                      style={{ ...card, border: '1px solid rgba(21,132,110,0.2)' }}
-                    >
-                      <h4
-                        style={{
-                          fontSize: '15px',
-                          fontWeight: 600,
-                          color: '#ffffff',
-                          letterSpacing: '0.021em',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        {getText({ az: edu.degreeAz, ru: edu.degreeRu, en: edu.degreeEn }, lang)}
-                      </h4>
-                      <p style={{ fontSize: '14px', color: '#15846e', letterSpacing: '0.021em', marginBottom: '2px' }}>
-                        {getText({ az: edu.institutionAz, ru: edu.institutionRu, en: edu.institutionEn }, lang)}
-                      </p>
-                      <p style={{ fontSize: '12px', color: '#9a9a9a', letterSpacing: '0.021em' }}>
-                        {edu.year}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {languages && languages.length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                  <p
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      letterSpacing: '0.05em',
-                      textTransform: 'uppercase',
-                      color: '#9a9a9a',
-                      marginBottom: '12px',
-                    }}
-                  >
-                    {getText({ az: 'Dillər', ru: 'Языки', en: 'Languages' }, lang)}
-                  </p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {languages.map(langItem => (
-                      <span
-                        key={langItem.id}
-                        style={{
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          color: '#bdbdbd',
-                          padding: '5px 16px',
-                          borderRadius: '24px',
-                          fontSize: '13px',
-                          fontWeight: 400,
-                          letterSpacing: '0.021em',
-                        }}
-                      >
-                        {getText({ az: langItem.languageAz, ru: langItem.languageRu, en: langItem.languageEn }, lang)}
-                        {': '}
-                        {getText({ az: langItem.proficiencyAz, ru: langItem.proficiencyRu, en: langItem.proficiencyEn }, lang)}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Projects ── */}
-      <section id="projects" className={SECTION} style={sectionDivider}>
-        <div className={CONTAINER}>
-          <div className="animate-on-scroll">
-            <span style={eyebrow}>
-              {getText({ az: 'Layihələr', ru: 'Проекты', en: 'Projects' }, lang)}
-            </span>
-            <h2 style={sectionTitle}>
-              {getText({ az: 'Seçilmiş İşlər', ru: 'Избранные работы', en: 'Selected Work' }, lang)}
-            </h2>
-
-            {projects && projects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {projects.filter(p => p.featured).map(project => (
-                  <div
-                    key={project.id}
-                    style={{ ...card, display: 'flex', flexDirection: 'column', gap: '14px' }}
-                  >
-                    {project.imageUrl ? (
-                      <div style={{ height: '160px', borderRadius: '16px', overflow: 'hidden' }}>
-                        <img
-                          src={project.imageUrl}
-                          alt={project.titleEn}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          height: '100px',
-                          borderRadius: '16px',
-                          border: '1px solid rgba(128,82,255,0.2)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#8052ff',
-                          fontWeight: 200,
-                          fontSize: '28px',
-                          letterSpacing: '-0.04em',
-                        }}
-                      >
-                        {project.titleEn.substring(0, 3).toUpperCase()}
-                      </div>
-                    )}
-
-                    <div>
-                      <h3
-                        style={{
-                          fontSize: '16px',
-                          fontWeight: 600,
-                          color: '#ffffff',
-                          letterSpacing: '0.021em',
-                          marginBottom: '6px',
-                        }}
-                      >
-                        {getText({ az: project.titleAz, ru: project.titleRu, en: project.titleEn }, lang)}
-                      </h3>
-                      <p
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: 400,
-                          lineHeight: 1.6,
-                          letterSpacing: '0.021em',
-                          color: '#9a9a9a',
-                        }}
-                      >
-                        {getText({ az: project.descAz, ru: project.descRu, en: project.descEn }, lang)}
-                      </p>
-                    </div>
-
-                    {project.techStack && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                        {project.techStack.split(',').map((tech, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              border: '1px solid rgba(255,255,255,0.1)',
-                              color: '#9a9a9a',
-                              padding: '3px 10px',
-                              borderRadius: '24px',
-                              fontSize: '11px',
-                              letterSpacing: '0.05em',
-                            }}
-                          >
-                            {tech.trim()}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {(project.githubUrl || project.liveUrl) && (
-                      <div style={{ display: 'flex', gap: '16px', marginTop: 'auto' }}>
-                        {project.githubUrl && (
-                          <a
-                            href={project.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ fontSize: '13px', color: '#8052ff', textDecoration: 'none', letterSpacing: '0.021em' }}
-                          >
-                            GitHub →
-                          </a>
-                        )}
-                        {project.liveUrl && (
-                          <a
-                            href={project.liveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ fontSize: '13px', color: '#8052ff', textDecoration: 'none', letterSpacing: '0.021em' }}
-                          >
-                            Live →
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {[
-                  {
-                    title: 'State Examination System',
-                    titleAz: 'Dövlət İmtahan Sistemi',
-                    titleRu: 'Государственная экзаменационная система',
-                    descEn: 'Large-scale government examination platform with React, TypeScript and Redux Toolkit',
-                    descAz: 'React, TypeScript və Redux Toolkit ilə geniş miqyaslı dövlət imtahan platforması',
-                    descRu: 'Крупномасштабная государственная экзаменационная платформа',
-                    tech: 'React, TypeScript, Redux Toolkit, ASP.NET Core',
-                  },
-                  {
-                    title: 'Business Portals',
-                    titleAz: 'Biznes Portalları',
-                    titleRu: 'Бизнес-порталы',
-                    descEn: 'Business applications and mobile solutions with React and React Native',
-                    descAz: 'React və React Native ilə biznes tətbiqləri',
-                    descRu: 'Бизнес-приложения с React и React Native',
-                    tech: 'React, React Native, Strapi, PostgreSQL',
-                  },
-                  {
-                    title: 'Interior Design Platform',
-                    titleAz: 'İnteryer dizaynı platforması',
-                    titleRu: 'Платформа дизайна интерьеров',
-                    descEn: 'Fullstack e-commerce solution with React, Angular and Spring Boot',
-                    descAz: 'React, Angular və Spring Boot ilə fullstack həll',
-                    descRu: 'Fullstack решение с React, Angular и Spring Boot',
-                    tech: 'React, Angular, Spring Boot, PostgreSQL',
-                  },
-                ].map(p => (
-                  <div
-                    key={p.title}
-                    style={{ ...card, display: 'flex', flexDirection: 'column', gap: '14px' }}
-                  >
-                    <div
-                      style={{
-                        height: '100px',
-                        borderRadius: '16px',
-                        border: '1px solid rgba(128,82,255,0.2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#8052ff',
-                        fontWeight: 200,
-                        fontSize: '28px',
-                        letterSpacing: '-0.04em',
-                      }}
-                    >
-                      {p.title.substring(0, 3).toUpperCase()}
-                    </div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#ffffff', letterSpacing: '0.021em' }}>
-                      {getText({ az: p.titleAz, ru: p.titleRu, en: p.title }, lang)}
-                    </h3>
-                    <p style={{ fontSize: '13px', color: '#9a9a9a', lineHeight: 1.6, letterSpacing: '0.021em' }}>
-                      {getText({ az: p.descAz, ru: p.descRu, en: p.descEn }, lang)}
-                    </p>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                      {p.tech.split(',').map((t, i) => (
-                        <span
-                          key={i}
-                          style={{
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: '#9a9a9a',
-                            padding: '3px 10px',
-                            borderRadius: '24px',
-                            fontSize: '11px',
-                            letterSpacing: '0.05em',
-                          }}
-                        >
-                          {t.trim()}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Contact ── */}
-      <section id="contact" className={SECTION} style={sectionDivider}>
-        <div className={CONTAINER}>
-          <div className="animate-on-scroll">
-            <span style={eyebrow}>
-              {getText({ az: 'Əlaqə', ru: 'Контакт', en: 'Contact' }, lang)}
-            </span>
-            <h2 style={sectionTitle}>
-              {getText({ az: 'Əlaqə Saxlayaq', ru: 'Свяжитесь со мной', en: "Let's Connect" }, lang)}
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-              {/* Left: info */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-                <p style={{ fontSize: '15px', fontWeight: 400, lineHeight: 1.7, letterSpacing: '0.025em', color: '#bdbdbd' }}>
-                  {getText({
-                    az: 'Yeni layihə üçün əməkdaşlığa hazırammı? Ya da sadəcə salam deməkmi istəyirsiniz? Mənə yazın!',
-                    ru: 'Готовы к сотрудничеству над новым проектом? Или просто хотите поздороваться? Напишите мне!',
-                    en: 'Ready to collaborate on a new project? Or just want to say hello? Drop me a line!',
-                  }, lang)}
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <ContactInfoRow
-                    href={`mailto:${contact?.email || 'kazimi.dev@gmail.com'}`}
-                    label={contact?.email || 'kazimi.dev@gmail.com'}
-                    icon={
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                      </svg>
-                    }
-                  />
-                  {contact?.phone && (
-                    <ContactInfoRow
-                      href={`tel:${contact.phone}`}
-                      label={contact.phone}
-                      icon={
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.62 4.38 2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l1.68-1.68a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-                        </svg>
-                      }
-                    />
-                  )}
-                  {contact?.linkedin && (
-                    <ContactInfoRow
-                      href={contact.linkedin}
-                      label={contact.linkedin.replace('https://', '')}
-                      external
-                      icon={
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
-                        </svg>
-                      }
-                    />
-                  )}
-                  {contact?.github && (
-                    <ContactInfoRow
-                      href={contact.github}
-                      label={contact.github.replace('https://', '')}
-                      external
-                      icon={
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-                        </svg>
-                      }
-                    />
-                  )}
-                  {contact?.telegram && (
-                    <ContactInfoRow
-                      href={`https://t.me/${contact.telegram.replace('@', '')}`}
-                      label={contact.telegram}
-                      external
-                      icon={
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                        </svg>
-                      }
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Right: form */}
-              <div style={card}>
-                <ContactForm />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Footer ── */}
-      <footer style={{ ...sectionDivider, padding: '32px 24px', textAlign: 'center' }}>
-        <p style={{ fontSize: '13px', color: '#9a9a9a', letterSpacing: '0.021em' }}>
-          © {settings?.copyrightYear || new Date().getFullYear()} Kamran Kazimi.{' '}
-          {settings
-            ? getText({ az: settings.footerTextAz, ru: settings.footerTextRu, en: settings.footerTextEn }, lang)
-            : getText({ az: 'Bütün hüquqlar qorunur.', ru: 'Все права защищены.', en: 'All rights reserved.' }, lang)}
-        </p>
-      </footer>
+          {getText({ az: 'Layihələr', ru: 'Проекты', en: 'Projects' }, lang)}
+        </button>
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('slide:go', { detail: 5 }))}
+          style={{ border: '1px solid rgba(255,255,255,0.22)', color: '#fff', padding: '13px 24px', borderRadius: 24, fontSize: 12, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
+        >
+          {getText({ az: 'Əlaqə', ru: 'Контакт', en: 'Contact' }, lang)}
+        </button>
+      </div>
     </div>
   );
 }
 
-function ContactInfoRow({
-  href,
-  label,
-  icon,
-  external,
-}: {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
-  external?: boolean;
-}) {
+function AboutSlide({ d }: { d: ContentBundle }) {
+  const { about, lang } = d;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <div
-        style={{
-          width: '38px',
-          height: '38px',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
+    <div style={{ maxWidth: 520, marginLeft: 'auto' }}>
+      <span style={eyebrow}>{getText({ az: 'Haqqımda', ru: 'Обо мне', en: 'About' }, lang)}</span>
+      <h2 style={heading}>
+        {about?.titleAz
+          ? getText({ az: about.titleAz, ru: about.titleRu, en: about.titleEn }, lang)
+          : getText({ az: 'Haqqımda', ru: 'Обо мне', en: 'About Me' }, lang)}
+      </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {[
+          about?.para1Az ? getText({ az: about.para1Az, ru: about.para1Ru, en: about.para1En }, lang) : getText({ az: '7+ il əməli təcrübəyə malik Frontend Developer.', ru: 'Frontend разработчик с 7+ годами опыта.', en: 'Frontend Developer with 7+ years of hands-on experience.' }, lang),
+          about?.para2Az ? getText({ az: about.para2Az, ru: about.para2Ru, en: about.para2En }, lang) : null,
+          about?.para3Az ? getText({ az: about.para3Az, ru: about.para3Ru, en: about.para3En }, lang) : null,
+        ].filter(Boolean).map((para, i) => (
+          <p key={i} style={bodyText}>{para}</p>
+        ))}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 20 }}>
+        {['React.js', 'TypeScript', 'Next.js', 'Redux Toolkit', 'React Native'].map(s => (
+          <span key={s} style={pill}>{s}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SkillsSlide({ d }: { d: ContentBundle }) {
+  const { skills, lang } = d;
+  const defaultCats = [
+    { name: 'Frontend', text: 'React.js, Next.js, TypeScript, Redux Toolkit, Angular 2+, Tailwind CSS, HTML5, SCSS' },
+    { name: 'Testing & Tools', text: 'Jest, React Testing Library, Git, GitLab CI/CD, Docker, Webpack, Vite, Figma' },
+    { name: 'Backend & APIs', text: 'REST APIs, GraphQL, ASP .Net Core, Spring Boot, PostgreSQL' },
+    { name: 'Mobile', text: 'React Native, Windows Forms (C#)' },
+    { name: 'Process', text: 'Agile (Scrum/Kanban), Code Review, CI/CD' },
+  ];
+  const cats = skills.length > 0
+    ? ['Frontend', 'Testing & Tools', 'Backend & APIs', 'Mobile & Desktop', 'Additional skills']
+        .map(name => ({ name, text: skills.filter(s => s.category === name).map(s => s.name).join(', ') }))
+        .filter(c => c.text)
+    : defaultCats;
+
+  return (
+    <div style={{ maxWidth: 780, margin: '0 auto', width: '100%' }}>
+      <span style={eyebrow}>{getText({ az: 'Bacarıqlar', ru: 'Навыки', en: 'Skills' }, lang)}</span>
+      <h2 style={heading}>{getText({ az: 'Texniki Bacarıqlar', ru: 'Технические навыки', en: 'Technical Skills' }, lang)}</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+        {cats.map(cat => (
+          <div key={cat.name} style={card}>
+            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8052ff', marginBottom: 8 }}>{cat.name}</p>
+            <p style={{ ...bodyText, fontSize: 13, lineHeight: 1.6 }}>{cat.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ExperienceSlide({ d }: { d: ContentBundle }) {
+  const { experiences, education, languages, lang } = d;
+  return (
+    <div style={{ maxWidth: 740, margin: '0 auto', width: '100%' }}>
+      <span style={eyebrow}>{getText({ az: 'İş Təcrübəsi', ru: 'Опыт работы', en: 'Experience' }, lang)}</span>
+      <h2 style={heading}>{getText({ az: 'Peşəkar Yol', ru: 'Профессиональный путь', en: 'Professional Journey' }, lang)}</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {experiences.length > 0 ? (
+          experiences.slice(0, 3).map(exp => (
+            <div key={exp.id} style={card}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: '#fff', letterSpacing: '0.021em', marginBottom: 2 }}>
+                    {getText({ az: exp.positionAz, ru: exp.positionRu, en: exp.positionEn }, lang)}
+                  </h3>
+                  <p style={{ fontSize: 13, color: '#8052ff' }}>
+                    {getText({ az: exp.companyAz, ru: exp.companyRu, en: exp.companyEn }, lang)}
+                  </p>
+                </div>
+                <span style={{ fontSize: 11, color: '#9a9a9a', whiteSpace: 'nowrap' }}>
+                  {getText({ az: exp.periodAz, ru: exp.periodRu, en: exp.periodEn }, lang)}
+                </span>
+              </div>
+              <p style={{ ...bodyText, fontSize: 13, lineHeight: 1.55 }}>
+                {getText({ az: exp.responsibilitiesAz, ru: exp.responsibilitiesRu, en: exp.responsibilitiesEn }, lang)
+                  .split('\n').filter(Boolean).slice(0, 2).join(' · ')}
+              </p>
+            </div>
+          ))
+        ) : (
+          <p style={{ color: '#9a9a9a' }}>{getText({ az: 'Məlumat yoxdur', ru: 'Нет данных', en: 'No data' }, lang)}</p>
+        )}
+      </div>
+      {education.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <span style={{ ...eyebrow, color: '#15846e' }}>{getText({ az: 'Təhsil', ru: 'Образование', en: 'Education' }, lang)}</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {education.map(edu => (
+              <div key={edu.id} style={{ ...card, border: '1px solid rgba(21,132,110,0.25)', minWidth: 200, flex: 1 }}>
+                <h4 style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 2 }}>
+                  {getText({ az: edu.degreeAz, ru: edu.degreeRu, en: edu.degreeEn }, lang)}
+                </h4>
+                <p style={{ fontSize: 13, color: '#15846e', marginBottom: 2 }}>
+                  {getText({ az: edu.institutionAz, ru: edu.institutionRu, en: edu.institutionEn }, lang)}
+                </p>
+                <p style={{ fontSize: 11, color: '#9a9a9a' }}>{edu.year}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {languages.length > 0 && (
+        <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {languages.map(l => (
+            <span key={l.id} style={{ ...pill, border: '1px solid rgba(255,255,255,0.1)' }}>
+              {getText({ az: l.languageAz, ru: l.languageRu, en: l.languageEn }, lang)}{': '}
+              {getText({ az: l.proficiencyAz, ru: l.proficiencyRu, en: l.proficiencyEn }, lang)}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProjectsSlide({ d }: { d: ContentBundle }) {
+  const { projects, lang } = d;
+  const fallback = [
+    { id: 'a', titleAz: 'Dövlət İmtahan Sistemi', titleRu: 'Государственная экзаменационная система', titleEn: 'State Examination System', descAz: 'React, TypeScript, Redux Toolkit ilə geniş platforma', descRu: 'Крупная платформа с React, TypeScript, Redux', descEn: 'Large-scale platform with React, TypeScript, Redux Toolkit', techStack: 'React, TypeScript, ASP.NET Core', githubUrl: '', liveUrl: '', imageUrl: '', featured: true },
+    { id: 'b', titleAz: 'Biznes Portalları', titleRu: 'Бизнес-порталы', titleEn: 'Business Portals', descAz: 'React Native ilə mobil həllər', descRu: 'Мобильные решения с React Native', descEn: 'Mobile solutions with React Native', techStack: 'React, React Native, Strapi', githubUrl: '', liveUrl: '', imageUrl: '', featured: true },
+    { id: 'c', titleAz: 'İnteryer Dizaynı Platforması', titleRu: 'Платформа дизайна интерьеров', titleEn: 'Interior Design Platform', descAz: 'Fullstack e-commerce həll', descRu: 'Fullstack e-commerce решение', descEn: 'Fullstack e-commerce solution', techStack: 'React, Angular, Spring Boot', githubUrl: '', liveUrl: '', imageUrl: '', featured: true },
+  ] as Project[];
+
+  const items = (projects.length > 0 ? projects.filter(p => p.featured).slice(0, 3) : fallback);
+
+  return (
+    <div style={{ maxWidth: 820, margin: '0 auto', width: '100%' }}>
+      <span style={eyebrow}>{getText({ az: 'Layihələr', ru: 'Проекты', en: 'Projects' }, lang)}</span>
+      <h2 style={heading}>{getText({ az: 'Seçilmiş İşlər', ru: 'Избранные работы', en: 'Selected Work' }, lang)}</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 14 }}>
+        {items.map(project => (
+          <div key={project.id} style={{ ...card, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ height: 80, borderRadius: 14, border: '1px solid rgba(128,82,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8052ff', fontWeight: 200, fontSize: 24, letterSpacing: '-0.04em' }}>
+              {(getText({ az: project.titleAz, ru: project.titleRu, en: project.titleEn }, lang) as string).substring(0, 3).toUpperCase()}
+            </div>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>
+              {getText({ az: project.titleAz, ru: project.titleRu, en: project.titleEn }, lang)}
+            </h3>
+            <p style={{ ...bodyText, fontSize: 13, lineHeight: 1.55, color: '#9a9a9a' }}>
+              {getText({ az: project.descAz, ru: project.descRu, en: project.descEn }, lang)}
+            </p>
+            {project.techStack && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 'auto' }}>
+                {project.techStack.split(',').map((t, i) => (
+                  <span key={i} style={{ ...pill, fontSize: 11, padding: '3px 10px', border: '1px solid rgba(255,255,255,0.1)', color: '#9a9a9a' }}>{t.trim()}</span>
+                ))}
+              </div>
+            )}
+            {(project.githubUrl || project.liveUrl) && (
+              <div style={{ display: 'flex', gap: 14 }}>
+                {project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#8052ff', textDecoration: 'none' }}>GitHub →</a>}
+                {project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#8052ff', textDecoration: 'none' }}>Live →</a>}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ContactSlide({ d }: { d: ContentBundle }) {
+  const { contact, settings, lang } = d;
+  return (
+    <div style={{ maxWidth: 500 }}>
+      <span style={eyebrow}>{getText({ az: 'Əlaqə', ru: 'Контакт', en: 'Contact' }, lang)}</span>
+      <h2 style={heading}>{getText({ az: 'Əlaqə Saxlayaq', ru: 'Свяжитесь со мной', en: "Let's Connect" }, lang)}</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
+        <ContactRow href={`mailto:${contact?.email || 'kazimi.dev@gmail.com'}`} label={contact?.email || 'kazimi.dev@gmail.com'} icon={emailIcon} />
+        {contact?.phone && <ContactRow href={`tel:${contact.phone}`} label={contact.phone} icon={phoneIcon} />}
+        {contact?.linkedin && <ContactRow href={contact.linkedin} label={contact.linkedin.replace('https://', '')} icon={linkedinIcon} external />}
+        {contact?.github && <ContactRow href={contact.github} label={contact.github.replace('https://', '')} icon={githubIcon} external />}
+        {contact?.telegram && <ContactRow href={`https://t.me/${contact.telegram.replace('@', '')}`} label={contact.telegram} icon={telegramIcon} external />}
+      </div>
+      <div style={card}>
+        <ContactForm />
+      </div>
+      <p style={{ fontSize: 12, color: '#9a9a9a', marginTop: 28 }}>
+        © {settings?.copyrightYear || new Date().getFullYear()} Kamran Kazimi.{' '}
+        {settings
+          ? getText({ az: settings.footerTextAz, ru: settings.footerTextRu, en: settings.footerTextEn }, lang)
+          : getText({ az: 'Bütün hüquqlar qorunur.', ru: 'Все права защищены.', en: 'All rights reserved.' }, lang)}
+      </p>
+    </div>
+  );
+}
+
+// ─── contact row ──────────────────────────────────────────────────────────────
+
+function ContactRow({ href, label, icon, external }: { href: string; label: string; icon: React.ReactNode; external?: boolean }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ width: 36, height: 36, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {icon}
       </div>
-      <a
-        href={href}
-        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        style={{ fontSize: '14px', color: '#bdbdbd', textDecoration: 'none', letterSpacing: '0.021em' }}
-      >
-        {label}
-      </a>
+      <a href={href} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})} style={{ fontSize: 14, color: '#bdbdbd', textDecoration: 'none' }}>{label}</a>
     </div>
+  );
+}
+
+const emailIcon = <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
+const phoneIcon = <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.62 4.38 2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l1.68-1.68a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+const linkedinIcon = <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>;
+const githubIcon = <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>;
+const telegramIcon = <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8052ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>;
+
+// ─── slide layout config ──────────────────────────────────────────────────────
+
+type ContentSide = 'left' | 'right' | 'center';
+
+interface SlideConfig {
+  id: string;
+  contentSide: ContentSide;
+  overlay: 'directional' | 'scattered';
+  render: (d: ContentBundle) => React.ReactNode;
+}
+
+const SLIDES: SlideConfig[] = [
+  { id: 'hero',       contentSide: 'left',   overlay: 'directional', render: d => <HeroSlide d={d} /> },
+  { id: 'about',      contentSide: 'right',  overlay: 'directional', render: d => <AboutSlide d={d} /> },
+  { id: 'skills',     contentSide: 'center', overlay: 'scattered',   render: d => <SkillsSlide d={d} /> },
+  { id: 'experience', contentSide: 'center', overlay: 'scattered',   render: d => <ExperienceSlide d={d} /> },
+  { id: 'projects',   contentSide: 'center', overlay: 'scattered',   render: d => <ProjectsSlide d={d} /> },
+  { id: 'contact',    contentSide: 'left',   overlay: 'directional', render: d => <ContactSlide d={d} /> },
+];
+
+// ─── page ─────────────────────────────────────────────────────────────────────
+
+export default function Home() {
+  const { lang } = useLanguage();
+  const { hero, about, projects, skills, contact, experiences, education, languages, settings, loading } = useContent();
+
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const lockRef = useRef(false);
+  const touchStartY = useRef(0);
+
+  const content: ContentBundle = { hero, about, projects, skills, contact, experiences, education, languages, settings, loading, lang };
+
+  const goToSlide = useCallback((next: number) => {
+    if (lockRef.current) return;
+    if (next < 0 || next >= SLIDE_COUNT || next === slideIndex) return;
+    lockRef.current = true;
+    setVisible(false);
+    setTimeout(() => {
+      setSlideIndex(next);
+      setVisible(true);
+      setTimeout(() => { lockRef.current = false; }, TRANSITION_LOCK_MS - 280);
+    }, 280);
+  }, [slideIndex]);
+
+  const advance = useCallback((dir: 1 | -1) => goToSlide(slideIndex + dir), [slideIndex, goToSlide]);
+
+  // wheel
+  useEffect(() => {
+    let accum = 0;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      accum += e.deltaY;
+      if (Math.abs(accum) >= 60) { advance(accum > 0 ? 1 : -1); accum = 0; }
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => window.removeEventListener('wheel', onWheel);
+  }, [advance]);
+
+  // touch
+  useEffect(() => {
+    const onStart = (e: TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
+    const onEnd = (e: TouchEvent) => {
+      const dy = touchStartY.current - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 50) advance(dy > 0 ? 1 : -1);
+    };
+    window.addEventListener('touchstart', onStart, { passive: true });
+    window.addEventListener('touchend', onEnd, { passive: true });
+    return () => { window.removeEventListener('touchstart', onStart); window.removeEventListener('touchend', onEnd); };
+  }, [advance]);
+
+  // keyboard
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') advance(1);
+      if (e.key === 'ArrowUp' || e.key === 'PageUp') advance(-1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [advance]);
+
+  // hash nav (from SiteControls links) + custom event
+  useEffect(() => {
+    const onHash = () => {
+      const idx = SLIDE_HASHES[window.location.hash];
+      if (idx !== undefined) goToSlide(idx);
+    };
+    const onCustom = (e: Event) => goToSlide((e as CustomEvent<number>).detail);
+    window.addEventListener('hashchange', onHash);
+    window.addEventListener('slide:go', onCustom);
+    return () => { window.removeEventListener('hashchange', onHash); window.removeEventListener('slide:go', onCustom); };
+  }, [goToSlide]);
+
+  const slide = SLIDES[slideIndex];
+
+  const overlayBg = slide.overlay === 'directional'
+    ? slide.contentSide === 'left'
+      ? 'linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.76) 38%, rgba(0,0,0,0.22) 68%, transparent 100%)'
+      : 'linear-gradient(270deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.76) 38%, rgba(0,0,0,0.22) 68%, transparent 100%)'
+    : 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.84) 100%)';
+
+  const contentJustify: React.CSSProperties['justifyContent'] =
+    slide.contentSide === 'left' ? 'flex-start' : slide.contentSide === 'right' ? 'flex-end' : 'center';
+
+  return (
+    <>
+      {/* Particle canvas — fixed, persists across slides */}
+      <ParticleCanvas slideIndex={slideIndex} />
+
+      {/* Gradient overlay */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: overlayBg, transition: 'background 0.6s ease' }} />
+
+      {/* Slide content */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 10, display: 'flex', alignItems: 'center', paddingTop: 64 }}>
+        <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '0 48px', display: 'flex', justifyContent: contentJustify }}>
+          <div
+            style={{
+              transition: 'opacity 0.28s ease, transform 0.28s ease',
+              opacity: visible ? 1 : 0,
+              transform: visible ? 'translateY(0px)' : 'translateY(20px)',
+              width: '100%',
+              maxHeight: 'calc(100vh - 140px)',
+              overflowY: slide.contentSide === 'center' ? 'auto' : 'visible',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {slide.render(content)}
+          </div>
+        </div>
+      </div>
+
+      {/* Slide progress dots — right edge */}
+      <div style={{ position: 'fixed', right: 24, top: '50%', transform: 'translateY(-50%)', zIndex: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {SLIDES.map((s, i) => (
+          <button
+            key={s.id}
+            onClick={() => goToSlide(i)}
+            title={s.id}
+            style={{
+              width: i === slideIndex ? 5 : 4,
+              height: i === slideIndex ? 22 : 4,
+              borderRadius: 8,
+              background: i === slideIndex ? '#8052ff' : 'rgba(255,255,255,0.22)',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Slide counter — bottom left */}
+      <div style={{ position: 'fixed', bottom: 28, left: 48, zIndex: 20, display: 'flex', alignItems: 'center', gap: 14 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)' }}>
+          {String(slideIndex + 1).padStart(2, '0')} / {String(SLIDE_COUNT).padStart(2, '0')}
+        </span>
+        <div style={{ width: 36, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#8052ff', opacity: visible ? 1 : 0, transition: 'opacity 0.3s' }}>
+          {slide.id}
+        </span>
+      </div>
+
+      {/* Scroll hint — first slide only */}
+      {slideIndex === 0 && visible && (
+        <div style={{ position: 'fixed', bottom: 28, right: 48, zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, opacity: 0.35 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>scroll</span>
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="none">
+            <rect x="1" y="1" width="10" height="18" rx="5" stroke="white" strokeWidth="1.2"/>
+            <circle cx="6" cy="6" r="1.5" fill="white">
+              <animate attributeName="cy" values="6;12;6" dur="1.8s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+        </div>
+      )}
+    </>
   );
 }

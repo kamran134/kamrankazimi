@@ -15,10 +15,10 @@ export function SiteControls() {
   }
 
   const navLinks = [
-    { href: '#about', label: getText({ az: 'Haqqımda', ru: 'Обо мне', en: 'About' }, lang) },
-    { href: '#experience', label: getText({ az: 'Təcrübə', ru: 'Опыт', en: 'Experience' }, lang) },
-    { href: '#projects', label: getText({ az: 'Layihələr', ru: 'Проекты', en: 'Projects' }, lang) },
-    { href: '#contact', label: getText({ az: 'Əlaqə', ru: 'Контакт', en: 'Contact' }, lang) },
+    { slide: 1, label: getText({ az: 'Haqqımda', ru: 'Обо мне', en: 'About' }, lang) },
+    { slide: 3, label: getText({ az: 'Təcrübə', ru: 'Опыт', en: 'Experience' }, lang) },
+    { slide: 4, label: getText({ az: 'Layihələr', ru: 'Проекты', en: 'Projects' }, lang) },
+    { slide: 5, label: getText({ az: 'Əlaqə', ru: 'Контакт', en: 'Contact' }, lang) },
   ];
 
   return (
@@ -66,7 +66,7 @@ export function SiteControls() {
           style={{ gap: '32px', alignItems: 'center' }}
         >
           {navLinks.map(link => (
-            <NavLink key={link.href} href={link.href}>
+            <NavLink key={link.slide} onClick={() => window.dispatchEvent(new CustomEvent('slide:go', { detail: link.slide }))}>
               {link.label}
             </NavLink>
           ))}
@@ -98,22 +98,25 @@ export function SiteControls() {
   );
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+function NavLink({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
-    <a
-      href={href}
+    <button
+      onClick={onClick}
       style={{
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
         fontSize: '14px',
         fontWeight: 400,
         letterSpacing: '0.021em',
         color: '#9a9a9a',
-        textDecoration: 'none',
         transition: 'color 0.2s',
       }}
       onMouseEnter={e => { e.currentTarget.style.color = '#ffffff'; }}
       onMouseLeave={e => { e.currentTarget.style.color = '#9a9a9a'; }}
     >
       {children}
-    </a>
+    </button>
   );
 }
