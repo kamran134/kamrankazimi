@@ -26,13 +26,15 @@ interface Particle {
   size: number;
 }
 
-// ─── color gradient (top=amber → white → plum → bottom=lichen) ───────────────
+// ─── color gradient (top=amber → lavender → plum → bottom=lichen) ───────────
+// No pure white: light lavender replaces it so particles never
+// merge visually with white text on dark backgrounds.
 
 function gradColor(t: number): string {
-  if (t < 0.28) return '#ffb829';
-  if (t < 0.50) return '#ffffff';
-  if (t < 0.74) return '#8052ff';
-  return '#15846e';
+  if (t < 0.28) return '#ffb829';   // amber
+  if (t < 0.50) return '#c8b8ff';   // light lavender (was #ffffff)
+  if (t < 0.74) return '#8052ff';   // plum
+  return '#15846e';                  // lichen
 }
 
 // ─── shape generators ─────────────────────────────────────────────────────────
