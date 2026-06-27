@@ -82,3 +82,20 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
+
+/* Glass backdrop — applied on mobile to keep slide text readable
+   over particle figures. On desktop the directional gradient handles it. */
+@media (max-width: 767px) {
+  .slide-glass {
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .slide-container {
+    padding: 0 16px !important;
+  }
+}

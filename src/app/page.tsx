@@ -94,7 +94,7 @@ function HeroSlide({ d }: { d: ContentBundle }) {
   }
   const { hero, lang } = d;
   return (
-    <div style={{ maxWidth: 500 }}>
+    <div className="slide-glass" style={{ maxWidth: 500 }}>
       <span style={eyebrow}>{getText({ az: hero.subtitleAz, ru: hero.subtitleRu, en: hero.subtitleEn }, lang)}</span>
       <h1 style={{ fontWeight: 200, fontSize: 'clamp(52px, 6.5vw, 78px)', lineHeight: 0.9, letterSpacing: '-0.04em', color: '#fff', marginBottom: 24 }}>
         {getText({ az: hero.titleAz, ru: hero.titleRu, en: hero.titleEn }, lang)}
@@ -123,7 +123,7 @@ function HeroSlide({ d }: { d: ContentBundle }) {
 function AboutSlide({ d }: { d: ContentBundle }) {
   const { about, lang } = d;
   return (
-    <div style={{ maxWidth: 520, marginLeft: 'auto' }}>
+    <div className="slide-glass" style={{ maxWidth: 520, marginLeft: 'auto' }}>
       <span style={eyebrow}>{getText({ az: 'Haqqımda', ru: 'Обо мне', en: 'About' }, lang)}</span>
       <h2 style={heading}>
         {about?.titleAz
@@ -293,7 +293,7 @@ function ProjectsSlide({ d }: { d: ContentBundle }) {
 function ContactSlide({ d }: { d: ContentBundle }) {
   const { contact, settings, lang } = d;
   return (
-    <div style={{ maxWidth: 500 }}>
+    <div className="slide-glass" style={{ maxWidth: 500 }}>
       <span style={eyebrow}>{getText({ az: 'Əlaqə', ru: 'Контакт', en: 'Contact' }, lang)}</span>
       <h2 style={heading}>{getText({ az: 'Əlaqə Saxlayaq', ru: 'Свяжитесь со мной', en: "Let's Connect" }, lang)}</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
@@ -449,7 +449,7 @@ export default function Home() {
 
       {/* Slide content */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 10, display: 'flex', alignItems: 'center', paddingTop: 64 }}>
-        <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '0 48px', display: 'flex', justifyContent: contentJustify }}>
+        <div className="slide-container" style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '0 48px', display: 'flex', justifyContent: contentJustify }}>
           <div
             style={{
               transition: 'opacity 0.28s ease, transform 0.28s ease',
