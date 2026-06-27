@@ -187,7 +187,7 @@ function ExperienceSlide({ d }: { d: ContentBundle }) {
       <h2 style={heading}>{getText({ az: 'Peşəkar Yol', ru: 'Профессиональный путь', en: 'Professional Journey' }, lang)}</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {experiences.length > 0 ? (
-          experiences.slice(0, 3).map(exp => (
+          [...experiences].reverse().map(exp => (
             <div key={exp.id} style={card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
                 <div>
