@@ -36,32 +36,58 @@ function gradColor(t: number): string {
 }
 
 // ─── shape generators ─────────────────────────────────────────────────────────
-// All return exactly N {x, y} points via acceptance-rejection sampling.
+// All return exactly N {x, y} points sampled along/within the shape.
 
-function brainPoints(count: number, cx: number, cy: number): { x: number; y: number }[] {
+// Samples points uniformly distributed along a set of thick line segments.
+// Each segment gets a share of `count` proportional to its length.
+function sampleStrokes(
+  count: number,
+  segments: [number, number, number, number][],  // [x1, y1, x2, y2]
+  strokeHalfWidth: number,
+): { x: number; y: number }[] {
+  const lengths = segments.map(([x1, y1, x2, y2]) =>
+    Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+  );
+  const totalLen = lengths.reduce((a, b) => a + b, 0);
   const pts: { x: number; y: number }[] = [];
-  const R = 175;      // circle radius
-  const sep = 105;    // horizontal separation of centers
-  const lCX = cx - sep * 0.5;
-  const rCX = cx + sep * 0.5;
-  const scaleY = 0.78; // squish vertically to look more brain-like
 
-  while (pts.length < count) {
-    const px = cx + (Math.random() - 0.5) * (R * 2 + sep) * 1.1;
-    const py = cy + (Math.random() - 0.5) * R * 2.2;
-
-    const py0 = (py - cy) / scaleY + cy;
-    const inLeft = (px - lCX) ** 2 + (py0 - cy) ** 2 < R * R;
-    const inRight = (px - rCX) ** 2 + (py0 - cy) ** 2 < R * R;
-
-    // Longitudinal fissure — thin gap at top center only
-    const inFissure = Math.abs(px - cx) < 11 && py < cy + R * 0.18;
-
-    if ((inLeft || inRight) && !inFissure) {
-      pts.push({ x: px, y: py });
+  segments.forEach(([x1, y1, x2, y2], si) => {
+    const n = Math.round(count * lengths[si] / totalLen);
+    const dx = x2 - x1, dy = y2 - y1, len = lengths[si];
+    // Perpendicular unit vector
+    const px = -dy / len, py = dx / len;
+    for (let i = 0; i < n; i++) {
+      const t = Math.random();
+      const off = (Math.random() - 0.5) * strokeHalfWidth * 2;
+      pts.push({ x: x1 + dx * t + px * off, y: y1 + dy * t + py * off });
     }
-  }
+  });
+
   return pts;
+}
+
+// `< / >` — code brackets. Classic developer symbol, crisp silhouette.
+function codeTagPoints(count: number, cx: number, cy: number): { x: number; y: number }[] {
+  const H = 250;   // total height (half = ±125)
+  const tip = 62;  // how far bracket tips extend horizontally from their base
+  const bx = 118;  // horizontal centre of each bracket's base
+  const sw = 17;   // stroke half-width → 34px full width
+
+  const half = H / 2;
+  const segments: [number, number, number, number][] = [
+    // < top arm
+    [cx - bx, cy - half,  cx - bx - tip, cy],
+    // < bottom arm
+    [cx - bx - tip, cy,   cx - bx, cy + half],
+    // / slash
+    [cx - 46, cy + half,  cx + 46, cy - half],
+    // > top arm
+    [cx + bx, cy - half,  cx + bx + tip, cy],
+    // > bottom arm
+    [cx + bx + tip, cy,   cx + bx, cy + half],
+  ];
+
+  return sampleStrokes(count, segments, sw);
 }
 
 function personPoints(count: number, cx: number, cy: number): { x: number; y: number }[] {
@@ -193,8 +219,8 @@ function scatteredPoints(count: number, w: number, h: number): { x: number; y: n
 function getTargets(slide: number, w: number, h: number): { x: number; y: number }[] {
   // Slides 0,1,5 form shapes; 2,3,4 are scattered ambient
   if (slide === 0) {
-    // Brain — right side
-    const main = brainPoints(Math.floor(N * 0.88), w * 0.72, h * 0.52);
+    // < / > — right side of hero
+    const main = codeTagPoints(Math.floor(N * 0.88), w * 0.72, h * 0.52);
     const ambient = scatteredPoints(N - main.length, w, h);
     return [...main, ...ambient];
   }
