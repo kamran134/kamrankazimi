@@ -368,6 +368,18 @@ export default function Home() {
   // Ref to the inner scroll container — used for boundary detection
   const contentScrollRef = useRef<HTMLDivElement>(null);
 
+  // Lock page scroll only while this component is mounted (home page only).
+  // Unmount restores scroll so /dashboard and other routes are unaffected.
+  useEffect(() => {
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = prev;
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const content: ContentBundle = { hero, about, projects, skills, contact, experiences, education, languages, settings, loading, lang };
 
   const goToSlide = useCallback((next: number) => {
