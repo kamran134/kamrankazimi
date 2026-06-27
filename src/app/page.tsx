@@ -365,6 +365,8 @@ export default function Home() {
   const [visible, setVisible] = useState(true);
   const lockRef = useRef(false);
   const touchStartY = useRef(0);
+  // Ref to the inner scroll container — used for boundary detection
+  const contentScrollRef = useRef<HTMLDivElement>(null);
 
   const content: ContentBundle = { hero, about, projects, skills, contact, experiences, education, languages, settings, loading, lang };
 
@@ -376,35 +378,57 @@ export default function Home() {
     setTimeout(() => {
       setSlideIndex(next);
       setVisible(true);
+      // Reset inner scroll to top when entering new slide
+      if (contentScrollRef.current) contentScrollRef.current.scrollTop = 0;
       setTimeout(() => { lockRef.current = false; }, TRANSITION_LOCK_MS - 280);
     }, 280);
   }, [slideIndex]);
 
   const advance = useCallback((dir: 1 | -1) => goToSlide(slideIndex + dir), [slideIndex, goToSlide]);
 
-  // wheel
+  // Returns true when the inner scroll container has reached its boundary
+  // in the given direction, meaning we can advance to the next slide.
+  const atScrollBoundary = useCallback((down: boolean): boolean => {
+    const el = contentScrollRef.current;
+    if (!el) return true;
+    // Content fits entirely — no inner scroll needed
+    if (el.scrollHeight <= el.clientHeight + 4) return true;
+    if (down) return el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+    return el.scrollTop <= 4;
+  }, []);
+
+  // wheel — only hijack when inner content is at its scroll boundary
   useEffect(() => {
     let accum = 0;
     const onWheel = (e: WheelEvent) => {
+      const down = e.deltaY > 0;
+      if (!atScrollBoundary(down)) {
+        // Inner content still has room — let the browser scroll it naturally
+        accum = 0;
+        return;
+      }
       e.preventDefault();
       accum += e.deltaY;
       if (Math.abs(accum) >= 60) { advance(accum > 0 ? 1 : -1); accum = 0; }
     };
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => window.removeEventListener('wheel', onWheel);
-  }, [advance]);
+  }, [advance, atScrollBoundary]);
 
-  // touch
+  // touch — same boundary logic
   useEffect(() => {
     const onStart = (e: TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
     const onEnd = (e: TouchEvent) => {
       const dy = touchStartY.current - e.changedTouches[0].clientY;
-      if (Math.abs(dy) > 50) advance(dy > 0 ? 1 : -1);
+      if (Math.abs(dy) > 50) {
+        const down = dy > 0;
+        if (atScrollBoundary(down)) advance(down ? 1 : -1);
+      }
     };
     window.addEventListener('touchstart', onStart, { passive: true });
     window.addEventListener('touchend', onEnd, { passive: true });
     return () => { window.removeEventListener('touchstart', onStart); window.removeEventListener('touchend', onEnd); };
-  }, [advance]);
+  }, [advance, atScrollBoundary]);
 
   // keyboard
   useEffect(() => {
@@ -451,13 +475,14 @@ export default function Home() {
       <div style={{ position: 'fixed', inset: 0, zIndex: 10, display: 'flex', alignItems: 'center', paddingTop: 64 }}>
         <div className="slide-container" style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '0 48px', display: 'flex', justifyContent: contentJustify }}>
           <div
+            ref={contentScrollRef}
             style={{
               transition: 'opacity 0.28s ease, transform 0.28s ease',
               opacity: visible ? 1 : 0,
               transform: visible ? 'translateY(0px)' : 'translateY(20px)',
               width: '100%',
               maxHeight: 'calc(100vh - 140px)',
-              overflowY: slide.contentSide === 'center' ? 'auto' : 'visible',
+              overflowY: 'auto',
               scrollbarWidth: 'none',
             }}
           >
